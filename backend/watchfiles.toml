@@ -1,0 +1,6 @@
+ignore = [
+    ".venv",
+    "venv",
+    "**/*.pyc",
+    "**/__pycache__"
+]

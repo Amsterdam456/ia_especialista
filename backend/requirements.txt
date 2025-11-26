@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+pydantic-setting
+watchdog
+pdfplumber
+python-docx 
+sentence-transformers 
+numpy
+python-dotenv
+openai
