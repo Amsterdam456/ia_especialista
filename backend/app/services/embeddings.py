@@ -5,15 +5,26 @@ import numpy as np
 import pickle
 from sentence_transformers import SentenceTransformer
 
+from app.core.config import settings
+
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
 # Carrega o modelo global uma única vez
 model = SentenceTransformer(MODEL_NAME)
 
-EMBEDDINGS_FILE = "data/embeddings.pkl"
+EMBEDDINGS_FILE = settings.EMBEDDINGS_FILE
 
 # Estrutura em memória
 emb_store = []  # [{"text": "...", "embedding": np.array([...]), "source": "..."}]
+
+
+def reset_embeddings():
+    """Limpa o armazenamento em memória e remove o arquivo persistido."""
+    global emb_store
+    emb_store = []
+
+    if os.path.exists(EMBEDDINGS_FILE):
+        os.remove(EMBEDDINGS_FILE)
 
 
 def store_embeddings(text_chunks, source_name: str):
@@ -36,7 +47,7 @@ def store_embeddings(text_chunks, source_name: str):
         )
 
     # Garante que a pasta exista
-    os.makedirs("data", exist_ok=True)
+    os.makedirs(os.path.dirname(EMBEDDINGS_FILE) or "data", exist_ok=True)
 
     with open(EMBEDDINGS_FILE, "wb") as f:
         pickle.dump(emb_store, f)

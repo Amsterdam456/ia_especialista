@@ -6,11 +6,12 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from app.core.config import settings
 from app.services.ingest import ingest_all_policies, POLICY_DIR
 
 
 HASH_FILE = POLICY_DIR / ".last_hash"
-CHECK_INTERVAL_SECONDS = 86400  # 1x por dia; em dev você pode reduzir para 5s, 10s, etc.
+CHECK_INTERVAL_SECONDS = settings.CHECK_INTERVAL_SECONDS
 
 
 def calculate_policies_hash() -> str | None:

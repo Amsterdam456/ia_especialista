@@ -1,192 +1,347 @@
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color-scheme: dark;
 }
 
 body {
   margin: 0;
+  background: #030712;
 }
 
-.athena-root {
-  display: flex;
+.athena-login,
+.athena-shell {
   min-height: 100vh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-/* SIDEBAR */
+.athena-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
 
-.athena-sidebar {
-  width: 220px;
-  background: rgba(4, 8, 20, 0.96);
-  padding: 16px 12px;
+.login-card {
+  width: 420px;
+  background: rgba(6, 10, 24, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 24px 26px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  color: #e7f3ff;
+  backdrop-filter: blur(12px);
+}
+
+.login-card h1 {
+  margin: 0 0 8px 0;
+  font-size: 1.4rem;
+}
+
+.login-card p {
+  margin: 0 0 18px 0;
+  color: #c8d8ff;
+  font-size: 0.95rem;
+}
+
+.login-card form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
 }
 
-.logo-mini {
-  font-weight: 800;
-  font-size: 1.2rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #9be5ff;
-}
-
-.athena-sidebar ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.athena-sidebar li {
-  padding: 8px 10px;
-  margin-bottom: 4px;
-  border-radius: 999px;
-  color: #c5d6ff;
+.login-card label {
   font-size: 0.85rem;
+  color: #9bc9ff;
+}
+
+.login-card input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 15, 28, 0.9);
+  color: #e7f3ff;
+}
+
+.login-card button,
+.primary,
+.outline {
+  border: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.athena-sidebar li:hover {
-  background: rgba(0, 173, 255, 0.16);
-  color: #e4f4ff;
-}
-
-.athena-sidebar li.active {
-  background: linear-gradient(90deg, #00b4ff, #00f5ff);
+.login-card button,
+.primary {
+  background: linear-gradient(90deg, #00c6ff, #00ffd1);
   color: #041018;
 }
 
-/* MAIN */
-
-.athena-main {
-  flex: 1;
-  padding: 24px 40px 40px 40px;
-  color: white;
+.outline {
+  background: transparent;
+  border: 1px solid rgba(155, 230, 255, 0.4);
+  color: #bce8ff;
 }
 
-.athena-header-tag {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(151, 221, 255, 0.7);
-  background: rgba(9, 132, 227, 0.2);
-  font-size: 0.7rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #e3f6ff;
+.login-card button:disabled,
+.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.athena-title {
-  margin-top: 18px;
-  margin-bottom: 10px;
-  font-size: 2.8rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
+.alert {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 99, 71, 0.15);
+  border: 1px solid rgba(255, 99, 71, 0.4);
+  color: #ffd1c7;
 }
 
-.athena-subtitle {
-  max-width: 720px;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #d4e6ff;
-}
-
-/* GRID */
-
-.athena-grid {
+.athena-shell {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 28px;
+  grid-template-columns: 280px 1fr;
 }
 
-.athena-card {
-  position: relative;
-  border-radius: 22px;
-  padding: 18px 18px 18px 18px;
-  background: radial-gradient(circle at top left, rgba(120, 210, 255, 0.18), rgba(0, 0, 40, 0.9));
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.75),
-    inset 0 0 24px rgba(255, 255, 255, 0.04);
+.athena-sidebar {
+  background: rgba(4, 8, 20, 0.95);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   backdrop-filter: blur(18px);
-  transition: all 0.18s ease-out;
+}
+
+.logo-mini {
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  color: #9be5ff;
+}
+
+.user-block {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-weight: 700;
+}
+
+.user-role {
+  color: #9bc9ff;
+  font-size: 0.85rem;
+}
+
+.sidebar-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.section-title {
+  font-size: 0.9rem;
+  color: #9bc9ff;
+  margin-bottom: 8px;
+}
+
+.chat-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-list li {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
   cursor: pointer;
 }
 
-.athena-card:hover {
-  transform: translateY(-6px) scale(1.01);
-  box-shadow:
-    0 22px 60px rgba(0, 0, 0, 0.9),
-    0 0 38px rgba(0, 255, 255, 0.18);
-  border-color: rgba(144, 224, 239, 0.7);
+.chat-list li.active {
+  border-color: rgba(0, 214, 255, 0.6);
+  box-shadow: 0 0 12px rgba(0, 214, 255, 0.25);
 }
 
-.athena-card-icon {
-  font-size: 1.6rem;
-  margin-bottom: 6px;
+.chat-list small {
+  display: block;
+  color: #8ea8c7;
+  margin-top: 4px;
 }
 
-.athena-card-title {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.athena-card-text {
-  font-size: 0.85rem;
-  color: #d0e4ff;
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-
-.athena-card-tag {
-  display: inline-block;
-  font-size: 0.7rem;
-  padding: 2px 8px;
+.pill {
+  display: inline-flex;
+  padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(144, 224, 239, 0.6);
-  background: rgba(0, 168, 255, 0.18);
+  border: 1px solid rgba(0, 214, 255, 0.4);
+  color: #bce8ff;
+  margin-right: 6px;
+  font-size: 0.85rem;
 }
 
-.athena-footer {
+.empty {
+  color: #9baac5;
+  font-size: 0.9rem;
+}
+
+.athena-main {
+  padding: 22px 30px;
+  color: white;
+}
+
+.athena-header .overline {
+  letter-spacing: 0.18em;
+  color: #9bc9ff;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.athena-header h1 {
+  margin: 6px 0 6px 0;
+  font-size: 2rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: #c8d8ff;
+}
+
+.chat-window {
   margin-top: 20px;
-  font-size: 0.7rem;
-  text-align: right;
-  color: #c4ddff;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.4);
 }
 
-/* RESPONSIVO */
-
-@media (max-width: 1100px) {
-  .athena-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.messages {
+  flex: 1;
+  padding: 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-@media (max-width: 800px) {
-  .athena-root {
-    flex-direction: column;
+.msg {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.msg.user {
+  border-color: rgba(0, 214, 255, 0.4);
+}
+
+.msg-role {
+  font-weight: 700;
+  color: #9bc9ff;
+}
+
+.msg-content {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.msg-time {
+  color: #8ea8c7;
+  font-size: 0.8rem;
+}
+
+.composer {
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  gap: 12px;
+}
+
+.composer textarea {
+  flex: 1;
+  min-height: 80px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 10, 18, 0.8);
+  color: white;
+  padding: 12px;
+}
+
+.admin-panel {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.table {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.table-head {
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+}
+
+.muted {
+  color: #9baac5;
+  margin-top: 0;
+}
+
+.pill-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill-list li {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(0, 214, 255, 0.12);
+  border: 1px solid rgba(0, 214, 255, 0.28);
+  color: #c8f1ff;
+}
+
+@media (max-width: 960px) {
+  .athena-shell {
+    grid-template-columns: 1fr;
   }
 
   .athena-sidebar {
-    width: 100%;
     flex-direction: row;
-    align-items: center;
-    gap: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
   }
 
-  .athena-main {
-    padding: 16px;
-  }
-
-  .athena-grid {
-    grid-template-columns: 1fr;
+  .chat-window {
+    min-height: 340px;
   }
 }

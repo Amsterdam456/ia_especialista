@@ -1,0 +1,1878 @@
+diff --git a/README.md b/README.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..aa8ce16da4643649b4dec43e0f1f4ac4641f1852
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,57 @@
++# IA Especialista - Operações e Deploy Local
++
++Este repositório contém o backend (FastAPI + SQLite + RAG) e o frontend (React/Vite) para o assistente da Estácio. Como o repositório local não possui um remoto configurado, use o passo a passo abaixo para conectar-se ao GitHub, testar e publicar suas alterações.
++
++## 1. Conectar ao GitHub e subir a branch `work`
++1. Crie o repositório no GitHub (ou use o existente) e copie a URL HTTPS ou SSH.
++2. Adicione o remoto:
++   ```bash
++   git remote add origin <URL_DO_SEU_REPOSITORIO>
++   git fetch origin
++   ```
++3. Publique a branch atual (`work`):
++   ```bash
++   git push -u origin work
++   ```
++4. Nas próximas alterações, basta usar `git push` para enviar novos commits.
++
++> Dica: se o comando `git pull` disser que "já está atualizado", é porque o remoto ainda não foi configurado. Após adicionar o `origin` e publicar a `work`, o `git pull`/`git push` passam a funcionar normalmente.
++
++### Baixar os arquivos sem remoto (zip)
++Se preferir levar o código para outra máquina antes de conectar ao GitHub, gere um zip a partir da raiz do projeto:
++
++```bash
++git archive --format=zip --output ../ia_especialista.zip HEAD
++```
++
++Transfira o arquivo `../ia_especialista.zip` para sua máquina, extraia e siga os passos acima para conectar ao GitHub e publicar.
++
++## 2. Rodar o backend
++```bash
++cd backend
++python -m venv .venv && source .venv/bin/activate
++pip install -r requirements.txt
++cp .env.example .env  # ajuste as variáveis se precisar
++uvicorn app.main:app --reload --port 8000
++```
++
++Pontos importantes:
++- Um admin padrão é criado no startup (e pode ser ajustado no `.env`).
++- Os PDFs/DOCX em `app/policies` são ingeridos e monitorados pelo watcher, que recalcula embeddings quando há mudanças.
++
++## 3. Rodar o frontend
++```bash
++cd frontend
++npm install
++cp .env.example .env  # defina VITE_API_URL se usar outra porta/host
++npm run dev -- --host
++```
++A interface usa a API em `http://localhost:8000` por padrão ou o valor configurado em `VITE_API_URL`.
++
++## 4. Verificações rápidas
++- Login com admin padrão e criação de usuários/chats podem ser feitos via frontend ou `curl` conforme o `backend/README.md`.
++- Para validar build:
++  ```bash
++  (backend) python -m compileall app
++  (frontend) npm run build
++  ```
+diff --git a/backend/.env.example b/backend/.env.example
+new file mode 100644
+index 0000000000000000000000000000000000000000..584ee8062d603797cb037aec41237e2380a4866e
+--- /dev/null
++++ b/backend/.env.example
+@@ -0,0 +1,23 @@
++# FastAPI server configuration
++API_V1_PREFIX="/api/v1"
++
++# Embeddings and policy ingestion
++EMBEDDINGS_FILE="data/embeddings.pkl"
++POLICY_DIR="policies"
++CHECK_INTERVAL_SECONDS=30
++
++# LM Studio (ou outro endpoint compatível com OpenAI API)
++LMSTUDIO_API_URL="http://localhost:1234/v1/chat/completions"
++LMSTUDIO_MODEL="phi-3.5-mini-3.8b-arliai-rpmax-v1.1"
++
++# Auth / JWT
++SECRET_KEY="change-me"
++ALGORITHM="HS256"
++ACCESS_TOKEN_EXPIRE_MINUTES=720
++
++# Database
++DATABASE_URL="sqlite:///./data/athena.db"
++
++# Admin bootstrap (criado na inicialização se não existir)
++ADMIN_EMAIL="admin@athena.local"
++ADMIN_PASSWORD="admin123"
+diff --git a/backend/README.md b/backend/README.md
+index d4c6803247dc933e2f45e16e0cd262e2baaf11a3..ccf342a4e35e7ef3c75caaab3186339ec048b7f7 100644
+GIT binary patch
+literal 3374
+zcmcgvU2hXd6n*!vxN;;&EY_P3XpvFW8ruPv1c%rGDpkskcPH_{?#?nZYeEq}2K528
+z5>I{O)qkw#&aNG&AXL<<QRHNI@6P=?=iKWJ>bjZC1r572E@Z4ks;p}?Ha6(Kh+oP)
+zq0IwfUH5pn)d=XM`+#Ddk;*Tmb&KCLC6WrAE<QRH3rjMiNEAhgTPjx4Mznd{KM4Dy
+z-t(<Cjp(&-@k|;rIuUH_W=4vH4>>RMM3W>VW0A&X%8#cqN#M!St5WdOL^>HeVJIsT
+zkuN?7+eS>?(#f3NFFtTUKRuiH5KCJw-W#P66p18LIr1_h(MH;PRA#h%UOl8jB!*vK
+z{7$h^u%ld)g)>(cv>A2#N5jWwgQM>7FuFzc<#BgBel|MkM_U}neUZnS#!n8FlfDp%
+za3U1GyzOKf`KX+j$`pk{#>)WgEsAHtah#dVt+>EPn|cBjTAHB5cp($HL+!G~r_`w;
+zMP|$QVm7W{&gdMqKpiitgoXDz!^PrHqhigW4)UbXDu>U)s61AMP`1+`3Me`rjVBa}
+z(#^u^2x&OswcDw_P&wawFj!h<GOFIjt*|onp{=a^RrppV@4`%4&e2|-y7o}mmsckt
+z4DMT4T4}s_<<Q?-1DGg)Ut6_t>sk`N^dX-~R$i16pJuKYNkY?kT3%`oXsfa!m6k!j
+zK|P&m4^PvGqG&4YtPv+Pt+>!A-ng00DadFp^EtKs=Zza=b!lQ*U58V|EMlkT!pTOV
+z3a|x0N>d5|eEF(WMxs~Fw%w&`lymgN<OJ5VGokVh{-Gc+GSwhP5ER-ty1Tu-&EZrb
+zJ{3kS-p{4-FcR5R;WXLk=|V|DZU!#qnxZyBY|Bf**+l@j5!Jnj8S$dDfN8Arb8Rw7
+zxs1^lPnb^QOPR+7t)J&Fs*s+Flu5N>5CD~yi;sy0q=2<n>+p!iu1u6}wK^0X9*rlb
+z{o&{gl5%!>a=1TpuIPkeszLmjwyv|YyLUUB?}Utt5Nd<)ozgkPM6SJlH0loy_lubd
+z_S$y><~RPiI}L<Ml~92xGI1HqciKA<BfiywE_narLGNTRIeRqtc^?j-V*$|1ls<eg
+zIvGwL9_>FI@80<ix8!A^Osy)QpVN>-*!6mY@%U^qdNhC_JU<?u49=hpr<1{W|NGtT
+z+M5>x@2}sTbnkb^1D~sXl|mhmZP*U~E)ScvbofGeMQOF3ReI?U>OCCv9-R#zPX;GX
+zyN74UWAwN`-rw7<duwE2G<OjK`87$d%F$&S0hy3#k^1x3ByQgm@5frZd_cbVmB~`}
+zDl2pgDqm|RbVFx?#h4KeSY2tT#T5&zyo3}fg9NYmHkU@RY8fz;02Nq4uHN%dh|zf#
+z|HjT1nm8_}0uZn1*lKxgtD(*Uo1d$Tl2x7|&d?G044kk8(E?jwS@SKrM{^x7{s4~+
+z9Ib?xg_(1yW(i)HvZ~*rsn(9?N5O~q>cGR=6odeMz2>_d{sd`(De!?ptqm>IAHoIs
+z?HN#beK;Y9GV>3KmU;wBqPR2=l;`Bt_A?5xU|bh*`h`94Pw<eMJ&o?<E||P2WQVl}
+z;~H(#dHBNWyt!ta(9O3^31v!~ohIfHv`7CaFC|#1+la1tt62zZUu%=Vz{-3kfQaV1
+zo0U5jE%r$VD5>B!0Ck&H0hc3JmuTr~)Ky5@`ZqaOUjB=OKj*>qeEst;=6ebx>sm96
+zbdY#Pr59mQlhkO(u)!b9>O^1<fY^f{zP1!yn|`R-`j{isEb;=$D;CzH^i_$~U{%Bw
+zyb=wf?X9rK(8CVLd`ItA0b&!&z)jvnY5=nK0^yh-9*}|xX)em#3E!7BByM=RFlPA`
+z?)5)FCY#zN$QX}Z>>JvsUp)ppbYBXCbjE|zN@rJq{08g>9=T4rR05d&#iu#fc#Wlu
+zQI2=RXL*(3x8xA+@OtsTWP%1mH$l!$^GS()jV!C_wTvK0SP-!c{ZR9d*>{_pe_%Y}
+z6K*_qZ_LrW$jFpA05QjwfnOfI5P2-{=e03Q{`nehE5uyqt_SoSUm6mKH|jf^YGD%I
+zWv@0)uc_Q|NdD;abvyc;WD$k<9>Eier%RhAMk9SrHa0Sm7z$hf3>UxS@OFo<2nyRB
+uc;U>NnAG#_9%LLV7`CtK2JDtIq@pCBZsiN?%GK_V1F?%?sa_vh?Z#h;|8;i&
+
+literal 40
+ocmezWPnki1A(J7IA)X<Xp_rinNG5~%IY6?Qp#&(y%fQ6|0Maf9cmMzZ
+
+diff --git a/backend/app/core/config.py b/backend/app/core/config.py
+index ef6d47593f1b070a8ca8522bce3e3d96b83d96c0..51ae4c0c9b8cdd7ac1ed4bbf1848fa3b0c0b3a40 100644
+--- a/backend/app/core/config.py
++++ b/backend/app/core/config.py
+@@ -1,27 +1,39 @@
+ # app/core/config.py
+ 
+ from pydantic_settings import BaseSettings
+ 
+ 
+ class Settings(BaseSettings):
+     # ROTAS
+-    API_V1_PREFIX: str = "/athena"
++    API_V1_PREFIX: str = "/api/v1"
+ 
+     # Embeddings
+     EMBEDDINGS_FILE: str = "data/embeddings.pkl"
+     POLICY_DIR: str = "policies"
+ 
+     # LM Studio
+     LMSTUDIO_API_URL: str = "http://localhost:1234/v1/chat/completions"
+     LMSTUDIO_MODEL: str = "phi-3.5-mini-3.8b-arliai-rpmax-v1.1"
+ 
+     # Watcher
+     CHECK_INTERVAL_SECONDS: int = 30
+ 
++    # Auth
++    SECRET_KEY: str = "change-me"
++    ALGORITHM: str = "HS256"
++    ACCESS_TOKEN_EXPIRE_MINUTES: int = 720
++
++    # Database
++    DATABASE_URL: str = "sqlite:///./data/athena.db"
++
++    # Admin bootstrap
++    ADMIN_EMAIL: str = "admin@athena.local"
++    ADMIN_PASSWORD: str = "admin123"
++
+     class Config:
+         env_file = ".env"
+         extra = "ignore"  # IGNORA variáveis extras no .env
+ 
+ 
+ # 👈 Agora o settings existe corretamente
+ settings = Settings()
+diff --git a/backend/app/core/deps.py b/backend/app/core/deps.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..900a824ea4a9fba97fdd48b69ce7f4c3e18cc242
+--- /dev/null
++++ b/backend/app/core/deps.py
+@@ -0,0 +1,13 @@
++from typing import Generator
++from fastapi import Depends
++from sqlalchemy.orm import Session
++
++from app.db.database import SessionLocal
++
++
++def get_db() -> Generator[Session, None, None]:
++    db = SessionLocal()
++    try:
++        yield db
++    finally:
++        db.close()
+diff --git a/backend/app/core/security.py b/backend/app/core/security.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..50f77f6a3d3e2673e7b8824801a584c95810e89e
+--- /dev/null
++++ b/backend/app/core/security.py
+@@ -0,0 +1,67 @@
++from datetime import datetime, timedelta
++from typing import Optional
++
++from fastapi import HTTPException, Depends, status
++from fastapi.security import OAuth2PasswordBearer
++from jose import JWTError, jwt
++from passlib.context import CryptContext
++from sqlalchemy.orm import Session
++
++from app.core.config import settings
++from app.core.deps import get_db
++from app.db import models
++
++pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
++oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
++
++
++class TokenData:
++    def __init__(self, user_id: int):
++        self.user_id = user_id
++
++
++def verify_password(plain_password: str, hashed_password: str) -> bool:
++    return pwd_context.verify(plain_password, hashed_password)
++
++
++def get_password_hash(password: str) -> str:
++    return pwd_context.hash(password)
++
++
++def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
++    to_encode = data.copy()
++    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
++    to_encode.update({"exp": expire})
++    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
++    return encoded_jwt
++
++
++def decode_token(token: str) -> TokenData:
++    credentials_exception = HTTPException(
++        status_code=status.HTTP_401_UNAUTHORIZED,
++        detail="Não foi possível validar as credenciais",
++        headers={"WWW-Authenticate": "Bearer"},
++    )
++
++    try:
++        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
++        user_id: int | None = payload.get("sub")
++        if user_id is None:
++            raise credentials_exception
++        return TokenData(user_id=int(user_id))
++    except JWTError:
++        raise credentials_exception
++
++
++def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
++    token_data = decode_token(token)
++    user = db.query(models.User).filter(models.User.id == token_data.user_id).first()
++    if not user:
++        raise HTTPException(status_code=404, detail="Usuário não encontrado")
++    return user
++
++
++def get_current_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
++    if not current_user.is_admin:
++        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Apenas administradores")
++    return current_user
+diff --git a/backend/app/core/watcher.py b/backend/app/core/watcher.py
+index 21524f9b2b4ad1d39c1cd7990962974836912941..9150349c6e2368cde9c422a6545594bad165c804 100644
+--- a/backend/app/core/watcher.py
++++ b/backend/app/core/watcher.py
+@@ -1,38 +1,39 @@
+ # app/core/watcher.py
+ 
+ import hashlib
+ import os
+ import time
+ from datetime import datetime
+ from pathlib import Path
+ 
++from app.core.config import settings
+ from app.services.ingest import ingest_all_policies, POLICY_DIR
+ 
+ 
+ HASH_FILE = POLICY_DIR / ".last_hash"
+-CHECK_INTERVAL_SECONDS = 86400  # 1x por dia; em dev você pode reduzir para 5s, 10s, etc.
++CHECK_INTERVAL_SECONDS = settings.CHECK_INTERVAL_SECONDS
+ 
+ 
+ def calculate_policies_hash() -> str | None:
+     """
+     Calcula um hash (sha256) de todos os arquivos de políticas.
+     Ignora arquivos ocultos e o próprio .last_hash.
+     """
+     if not POLICY_DIR.exists():
+         return None
+ 
+     hasher = hashlib.sha256()
+ 
+     for root, dirs, files in os.walk(POLICY_DIR):
+         # Ignora diretórios ocultos
+         dirs[:] = [d for d in dirs if not d.startswith(".")]
+ 
+         for fname in sorted(files):
+             if fname.startswith("."):
+                 continue
+ 
+             path = Path(root) / fname
+             rel = path.relative_to(POLICY_DIR)
+ 
+             hasher.update(str(rel).encode("utf-8"))
+ 
+diff --git a/backend/app/db/__init__.py b/backend/app/db/__init__.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/backend/app/db/database.py b/backend/app/db/database.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..3158f664796552b98b459743ffd4e939e3687467
+--- /dev/null
++++ b/backend/app/db/database.py
+@@ -0,0 +1,16 @@
++import os
++from sqlalchemy import create_engine
++from sqlalchemy.orm import sessionmaker, declarative_base
++
++from app.core.config import settings
++
++DATABASE_URL = settings.DATABASE_URL
++
++if DATABASE_URL.startswith("sqlite"):
++    os.makedirs("data", exist_ok=True)
++    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
++else:
++    engine = create_engine(DATABASE_URL)
++
++SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
++Base = declarative_base()
+diff --git a/backend/app/db/init_db.py b/backend/app/db/init_db.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..832b7a5a096b8454780ed7b07d3f036bd3eb78c0
+--- /dev/null
++++ b/backend/app/db/init_db.py
+@@ -0,0 +1,22 @@
++from sqlalchemy.orm import Session
++
++from app.core.config import settings
++from app.core.security import get_password_hash
++from app.db import models
++
++
++def ensure_admin_user(db: Session):
++    existing = db.query(models.User).filter(models.User.email == settings.ADMIN_EMAIL).first()
++    if existing:
++        return existing
++
++    admin = models.User(
++        email=settings.ADMIN_EMAIL,
++        full_name="Administrador",
++        hashed_password=get_password_hash(settings.ADMIN_PASSWORD),
++        is_admin=True,
++    )
++    db.add(admin)
++    db.commit()
++    db.refresh(admin)
++    return admin
+diff --git a/backend/app/db/models.py b/backend/app/db/models.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..19e0426ade015db9eaf7b99a29b22b965a3846f3
+--- /dev/null
++++ b/backend/app/db/models.py
+@@ -0,0 +1,42 @@
++from datetime import datetime
++from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
++from sqlalchemy.orm import relationship
++
++from app.db.database import Base
++
++
++class User(Base):
++    __tablename__ = "users"
++
++    id = Column(Integer, primary_key=True, index=True)
++    email = Column(String, unique=True, index=True, nullable=False)
++    full_name = Column(String, nullable=True)
++    hashed_password = Column(String, nullable=False)
++    is_admin = Column(Boolean, default=False)
++    created_at = Column(DateTime, default=datetime.utcnow)
++
++    chats = relationship("ChatSession", back_populates="owner", cascade="all, delete")
++
++
++class ChatSession(Base):
++    __tablename__ = "chats"
++
++    id = Column(Integer, primary_key=True, index=True)
++    title = Column(String, nullable=False)
++    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
++    created_at = Column(DateTime, default=datetime.utcnow)
++
++    owner = relationship("User", back_populates="chats")
++    messages = relationship("Message", back_populates="chat", cascade="all, delete-orphan")
++
++
++class Message(Base):
++    __tablename__ = "messages"
++
++    id = Column(Integer, primary_key=True, index=True)
++    role = Column(String, nullable=False)
++    content = Column(Text, nullable=False)
++    chat_id = Column(Integer, ForeignKey("chats.id"), nullable=False)
++    created_at = Column(DateTime, default=datetime.utcnow)
++
++    chat = relationship("ChatSession", back_populates="messages")
+diff --git a/backend/app/main.py b/backend/app/main.py
+index 6ce4e99d1949d6daac90e9fc35a518f6a0f99fd5..04e19cf59694622eca5d5ed022e10f63132953e8 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -1,36 +1,61 @@
+ from fastapi import FastAPI
+ from fastapi.middleware.cors import CORSMiddleware
+ import threading
+ from dotenv import load_dotenv
++
+ load_dotenv()
+ 
+ from app.core.config import settings
+ from app.api.v1 import router as api_router
+ from app.routes.athena import router as athena_router
+-from app.core.watcher import start_policy_watcher
++from app.routes.auth import router as auth_router
++from app.routes.chats import router as chat_router
++from app.routes.admin import router as admin_router
++from app.services.ingest import ingest_all_policies
++from app.core.watcher import (
++    start_policy_watcher,
++    calculate_policies_hash,
++    save_last_hash,
++)
++from app.db.database import Base, engine, SessionLocal
++from app.db.init_db import ensure_admin_user
+ 
+ app = FastAPI(
+     title="Athena Specialist IA",
+     version="0.1.0",
+ )
+ 
+ # CORS
+ app.add_middleware(
+     CORSMiddleware,
+     allow_origins=["*"],
+     allow_credentials=True,
+     allow_methods=["*"],
+     allow_headers=["*"],
+ )
+ 
+ # Rotas da API v1 (stub antigo)
+ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
+ 
+ # Rotas da IA de verdade (RAG)
+ app.include_router(athena_router, prefix="/athena")
+ 
++# Autenticação e chat multi-conversas
++app.include_router(auth_router)
++app.include_router(chat_router)
++app.include_router(admin_router)
++
+ 
+ @app.on_event("startup")
+ def startup_event():
++    # Banco e usuário admin
++    Base.metadata.create_all(bind=engine)
++    with SessionLocal() as db:
++        ensure_admin_user(db)
++
++    # Inicializa embeddings atuais antes de iniciar o watcher em segundo plano
++    ingest_all_policies()
++    save_last_hash(calculate_policies_hash())
++
+     watcher_thread = threading.Thread(target=start_policy_watcher, daemon=True)
+     watcher_thread.start()
+diff --git a/backend/app/routes/admin.py b/backend/app/routes/admin.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..7d1443676ffa20c370c5eb286def56872285b6bb
+--- /dev/null
++++ b/backend/app/routes/admin.py
+@@ -0,0 +1,25 @@
++from fastapi import APIRouter, Depends
++from sqlalchemy.orm import Session
++
++from app.core.deps import get_db
++from app.core.security import get_current_admin
++from app.db import models
++from app.schemas import UserOut
++from app.services.ingest import POLICY_DIR
++
++router = APIRouter(prefix="/admin", tags=["admin"])
++
++
++@router.get("/users", response_model=list[UserOut])
++def list_users(
++    _: models.User = Depends(get_current_admin),
++    db: Session = Depends(get_db),
++):
++    return db.query(models.User).order_by(models.User.created_at.desc()).all()
++
++
++@router.get("/policies", response_model=list[str])
++def list_policies(_: models.User = Depends(get_current_admin)):
++    if not POLICY_DIR.exists():
++        return []
++    return [p.name for p in POLICY_DIR.iterdir() if p.is_file() and not p.name.startswith(".")]
+diff --git a/backend/app/routes/auth.py b/backend/app/routes/auth.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..9e1778d43a141626bd8e83ab1328879cd53d2df5
+--- /dev/null
++++ b/backend/app/routes/auth.py
+@@ -0,0 +1,51 @@
++from datetime import timedelta
++
++from fastapi import APIRouter, Depends, HTTPException, status
++from sqlalchemy.orm import Session
++
++from app.core.config import settings
++from app.core.deps import get_db
++from app.core.security import (
++    create_access_token,
++    get_current_user,
++    get_password_hash,
++    verify_password,
++)
++from app.db import models
++from app.schemas import Token, UserCreate, UserLogin, UserOut
++
++router = APIRouter(prefix="/auth", tags=["auth"])
++
++
++@router.post("/register", response_model=UserOut)
++def register(user_in: UserCreate, db: Session = Depends(get_db)):
++    existing = db.query(models.User).filter(models.User.email == user_in.email).first()
++    if existing:
++        raise HTTPException(status_code=400, detail="E-mail já registrado")
++
++    user = models.User(
++        email=user_in.email,
++        full_name=user_in.full_name,
++        hashed_password=get_password_hash(user_in.password),
++        is_admin=False,
++    )
++    db.add(user)
++    db.commit()
++    db.refresh(user)
++    return user
++
++
++@router.post("/login", response_model=Token)
++def login(payload: UserLogin, db: Session = Depends(get_db)):
++    user = db.query(models.User).filter(models.User.email == payload.email).first()
++    if not user or not verify_password(payload.password, user.hashed_password):
++        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
++
++    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
++    token = create_access_token({"sub": str(user.id)}, expires_delta=access_token_expires)
++    return {"access_token": token, "token_type": "bearer"}
++
++
++@router.get("/me", response_model=UserOut)
++def me(current_user: models.User = Depends(get_current_user)):
++    return current_user
+diff --git a/backend/app/routes/chats.py b/backend/app/routes/chats.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..39951fc6b2824b038efead0a85fa904445061a33
+--- /dev/null
++++ b/backend/app/routes/chats.py
+@@ -0,0 +1,85 @@
++from datetime import datetime
++
++from fastapi import APIRouter, Depends, HTTPException
++from sqlalchemy.orm import Session
++
++from app.core.deps import get_db
++from app.core.security import get_current_user
++from app.db import models
++from app.schemas import AskPayload, ChatCreate, ChatOut, MessageOut
++from app.services.embeddings import search_similar_documents
++from app.services.generator import generate_answer
++
++router = APIRouter(prefix="/chats", tags=["chats"])
++
++
++@router.get("", response_model=list[ChatOut])
++def list_chats(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
++    chats = (
++        db.query(models.ChatSession)
++        .filter(models.ChatSession.user_id == current_user.id)
++        .order_by(models.ChatSession.created_at.desc())
++        .all()
++    )
++    return chats
++
++
++@router.post("", response_model=ChatOut)
++def create_chat(
++    chat_in: ChatCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)
++):
++    title = chat_in.title or f"Nova conversa ({datetime.utcnow().strftime('%d/%m %H:%M')})"
++    chat = models.ChatSession(title=title, user_id=current_user.id)
++    db.add(chat)
++    db.commit()
++    db.refresh(chat)
++    return chat
++
++
++@router.get("/{chat_id}/messages", response_model=list[MessageOut])
++def get_messages(
++    chat_id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)
++):
++    chat = db.query(models.ChatSession).filter(models.ChatSession.id == chat_id).first()
++    if not chat or chat.user_id != current_user.id:
++        raise HTTPException(status_code=404, detail="Chat não encontrado")
++
++    return (
++        db.query(models.Message)
++        .filter(models.Message.chat_id == chat_id)
++        .order_by(models.Message.created_at.asc())
++        .all()
++    )
++
++
++@router.post("/{chat_id}/ask", response_model=list[MessageOut])
++def ask_chat(
++    chat_id: int,
++    payload: AskPayload,
++    current_user: models.User = Depends(get_current_user),
++    db: Session = Depends(get_db),
++):
++    chat = db.query(models.ChatSession).filter(models.ChatSession.id == chat_id).first()
++    if not chat or chat.user_id != current_user.id:
++        raise HTTPException(status_code=404, detail="Chat não encontrado")
++
++    user_message = models.Message(role="user", content=payload.question, chat_id=chat_id)
++    db.add(user_message)
++
++    hits = search_similar_documents(payload.question, k=4)
++    if not hits:
++        answer = "Ainda não tenho conhecimento suficiente para responder com base nas políticas."
++    else:
++        context = "\n\n".join(h["text"] for h in hits)
++        answer = generate_answer(context, payload.question)
++
++    assistant_message = models.Message(role="assistant", content=answer, chat_id=chat_id)
++    db.add(assistant_message)
++    db.commit()
++
++    return (
++        db.query(models.Message)
++        .filter(models.Message.chat_id == chat_id)
++        .order_by(models.Message.created_at.asc())
++        .all()
++    )
+diff --git a/backend/app/schemas.py b/backend/app/schemas.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..126f43e1506be6a904906487b3d6a71b81c865f2
+--- /dev/null
++++ b/backend/app/schemas.py
+@@ -0,0 +1,59 @@
++from datetime import datetime
++from typing import List, Optional
++from pydantic import BaseModel, EmailStr
++
++
++class Token(BaseModel):
++    access_token: str
++    token_type: str = "bearer"
++
++
++class UserBase(BaseModel):
++    email: EmailStr
++    full_name: Optional[str] = None
++
++
++class UserCreate(UserBase):
++    password: str
++
++
++class UserLogin(BaseModel):
++    email: EmailStr
++    password: str
++
++
++class UserOut(UserBase):
++    id: int
++    is_admin: bool
++    created_at: datetime
++
++    class Config:
++        orm_mode = True
++
++
++class MessageOut(BaseModel):
++    id: int
++    role: str
++    content: str
++    created_at: datetime
++
++    class Config:
++        orm_mode = True
++
++
++class ChatCreate(BaseModel):
++    title: Optional[str] = None
++
++
++class ChatOut(BaseModel):
++    id: int
++    title: str
++    created_at: datetime
++    messages: List[MessageOut] = []
++
++    class Config:
++        orm_mode = True
++
++
++class AskPayload(BaseModel):
++    question: str
+diff --git a/backend/app/services/embeddings.py b/backend/app/services/embeddings.py
+index 6106cd76a6ddc4b5dad4eb84e2afce9607a52e2e..9876303a95d374635ebaa14a27ae8b8a59d35592 100644
+--- a/backend/app/services/embeddings.py
++++ b/backend/app/services/embeddings.py
+@@ -1,64 +1,75 @@
+ # app/services/embeddings.py
+ 
+ import os
+ import numpy as np
+ import pickle
+ from sentence_transformers import SentenceTransformer
+ 
++from app.core.config import settings
++
+ MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+ 
+ # Carrega o modelo global uma única vez
+ model = SentenceTransformer(MODEL_NAME)
+ 
+-EMBEDDINGS_FILE = "data/embeddings.pkl"
++EMBEDDINGS_FILE = settings.EMBEDDINGS_FILE
+ 
+ # Estrutura em memória
+ emb_store = []  # [{"text": "...", "embedding": np.array([...]), "source": "..."}]
+ 
+ 
++def reset_embeddings():
++    """Limpa o armazenamento em memória e remove o arquivo persistido."""
++    global emb_store
++    emb_store = []
++
++    if os.path.exists(EMBEDDINGS_FILE):
++        os.remove(EMBEDDINGS_FILE)
++
++
+ def store_embeddings(text_chunks, source_name: str):
+     """
+     Recebe blocos de texto e salva embeddings no arquivo e na memória.
+     """
+     global emb_store
+ 
+     for chunk in text_chunks:
+         if not chunk.strip():
+             continue
+ 
+         embedding = model.encode(chunk, convert_to_numpy=True)
+         emb_store.append(
+             {
+                 "text": chunk,
+                 "embedding": embedding,
+                 "source": source_name,
+             }
+         )
+ 
+     # Garante que a pasta exista
+-    os.makedirs("data", exist_ok=True)
++    os.makedirs(os.path.dirname(EMBEDDINGS_FILE) or "data", exist_ok=True)
+ 
+     with open(EMBEDDINGS_FILE, "wb") as f:
+         pickle.dump(emb_store, f)
+ 
+ 
+ def load_embeddings():
+     """
+     Carrega o arquivo embeddings.pkl na memória.
+     """
+     global emb_store
+ 
+     if os.path.exists(EMBEDDINGS_FILE):
+         with open(EMBEDDINGS_FILE, "rb") as f:
+             emb_store = pickle.load(f)
+     else:
+         emb_store = []
+ 
+ 
+ def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+     """
+     Similaridade de cosseno entre dois vetores numpy.
+     """
+     denom = (np.linalg.norm(a) * np.linalg.norm(b)) + 1e-8
+     return float(np.dot(a, b) / denom)
+ 
+diff --git a/backend/app/services/generator.py b/backend/app/services/generator.py
+index 02047b8ea9abfb44b545b8f1b14d79b9290398be..daec484ccff645b2fa893e208d794afa90595d2a 100644
+--- a/backend/app/services/generator.py
++++ b/backend/app/services/generator.py
+@@ -1,47 +1,48 @@
+ # app/services/generator.py
+ 
+-import os
+ import requests
+ 
+-LMSTUDIO_API_URL = os.getenv("LMSTUDIO_API_URL", "http://localhost:1234/v1/chat/completions")
+-MODEL_NAME = os.getenv("LMSTUDIO_MODEL", "phi-3.5-mini-3.8b-arliai-rpmax-v1.1")
++from app.core.config import settings
++
++LMSTUDIO_API_URL = settings.LMSTUDIO_API_URL
++MODEL_NAME = settings.LMSTUDIO_MODEL
+ 
+ 
+ def generate_answer(context: str, question: str) -> str:
+     """
+     Gera resposta usando LM Studio como motor LLM local.
+     """
+ 
+     prompt = f"""
+ Você é a IA ATHENA, especialista em interpretar políticas internas da Estácio/YDUQS.
+ 
+ Base de conhecimento relevante (RAG):
+ 
+ {context}
+ 
+ Pergunta:
+ {question}
+ 
+ Responda com extrema precisão, apenas com base no texto acima.
+ Se a política não cobre o assunto, diga claramente: "Essa política não trata sobre isso."
+ """
+ 
+     body = {
+         "model": MODEL_NAME,
+         "messages": [
+             {"role": "system", "content": "Você é a IA corporativa Athena, objetiva e precisa."},
+-            {"role": "user", "content": prompt}
++            {"role": "user", "content": prompt},
+         ],
+         "temperature": 0.1,
+-        "max_tokens": 700
++        "max_tokens": 700,
+     }
+ 
+     try:
+         resp = requests.post(LMSTUDIO_API_URL, json=body)
+         resp.raise_for_status()
+ 
+         data = resp.json()
+         return data["choices"][0]["message"]["content"].strip()
+ 
+     except Exception as e:
+         return f"Erro ao gerar resposta: {e}"
+diff --git a/backend/app/services/ingest.py b/backend/app/services/ingest.py
+index b3fd759e4da0771d6d7b7e04f550e54e05230736..094e439255e88b015cdbd38162ca51d14455ba90 100644
+--- a/backend/app/services/ingest.py
++++ b/backend/app/services/ingest.py
+@@ -1,34 +1,66 @@
+ import os
+ from pathlib import Path
++from typing import List
++
++from app.core.config import settings
+ from app.services.parser import extract_text_from_file
+-from app.services.embeddings import store_embeddings
+-from app.services.ingest import split_into_chunks
++from app.services.embeddings import reset_embeddings, store_embeddings
+ 
+ BASE_DIR = Path(__file__).resolve().parent.parent.parent
+-POLICY_DIR = BASE_DIR / "policies"
++POLICY_DIR = BASE_DIR / settings.POLICY_DIR
++
++
++def split_into_chunks(text: str, chunk_size: int = 800, overlap: int = 120) -> List[str]:
++    """Split raw text into overlapping chunks to feed the embedding model.
++
++    Args:
++        text: Full text extracted from the policy document.
++        chunk_size: Target chunk length (in characters).
++        overlap: Number of characters to repeat between consecutive chunks to
++            preserve context around the split point.
++    """
++
++    cleaned = "\n".join(line.strip() for line in text.splitlines() if line.strip())
++    if not cleaned:
++        return []
++
++    chunks: List[str] = []
++    start = 0
++    text_length = len(cleaned)
++
++    while start < text_length:
++        end = start + chunk_size
++        chunk = cleaned[start:end]
++        chunks.append(chunk)
++        start = end - overlap
++
++    return chunks
+ 
+ 
+ def ingest_all_policies():
+     print("📘 Iniciando processamento das políticas...")
+ 
+     POLICY_DIR.mkdir(exist_ok=True)
+ 
++    # Evita duplicação de embeddings a cada reinício do serviço
++    reset_embeddings()
++
+     for filename in os.listdir(POLICY_DIR):
+         if filename.startswith("."):
+             continue
+ 
+         file_path = POLICY_DIR / filename
+         print(f"🔹 Processando: {filename}")
+ 
+         text = extract_text_from_file(file_path)
+ 
+         if not text.strip():
+             print(f"⚠️ Arquivo {filename} não contém texto extraído!")
+             continue
+ 
+         chunks = split_into_chunks(text)
+         print(f"🧩 {len(chunks)} chunks gerados para {filename}")
+ 
+         store_embeddings(chunks, filename)
+ 
+     print("✨ Processo de ingestão concluído!")
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+index 08dbfa344e9559e4afe60da466a93169332286f5..112b7ef9495de33b3767720f8cc2697a11ecc0ea 100644
+--- a/backend/requirements.txt
++++ b/backend/requirements.txt
+@@ -1,12 +1,14 @@
+ fastapi
+ uvicorn[standard]
+ pydantic
++pydantic-settings
+ python-dotenv
+-pydantic-setting
+ watchdog
+ pdfplumber
+-python-docx 
+-sentence-transformers 
++python-docx
++sentence-transformers
+ numpy
+-python-dotenv
+-openai
+\ No newline at end of file
++openai
++sqlalchemy
++passlib[bcrypt]
++python-jose[cryptography]
+diff --git a/frontend/.env.example b/frontend/.env.example
+new file mode 100644
+index 0000000000000000000000000000000000000000..5934e2e7d2d17fde2f262dd89007afdc2e7fb9c1
+--- /dev/null
++++ b/frontend/.env.example
+@@ -0,0 +1 @@
++VITE_API_URL=http://localhost:8000
+diff --git a/frontend/src/App.css b/frontend/src/App.css
+index 576e8d167ed515313a3b9b81167827b59ed29ded..a3e3ea9abb78b647183c7b8dd3549a02b95139f6 100644
+--- a/frontend/src/App.css
++++ b/frontend/src/App.css
+@@ -1,192 +1,347 @@
+ :root {
+-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
++  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+   color-scheme: dark;
+ }
+ 
+ body {
+   margin: 0;
++  background: #030712;
+ }
+ 
+-.athena-root {
+-  display: flex;
++.athena-login,
++.athena-shell {
+   min-height: 100vh;
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+ }
+ 
+-/* SIDEBAR */
++.athena-login {
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  padding: 32px;
++}
++
++.login-card {
++  width: 420px;
++  background: rgba(6, 10, 24, 0.92);
++  border: 1px solid rgba(255, 255, 255, 0.08);
++  border-radius: 14px;
++  padding: 24px 26px;
++  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
++  color: #e7f3ff;
++  backdrop-filter: blur(12px);
++}
++
++.login-card h1 {
++  margin: 0 0 8px 0;
++  font-size: 1.4rem;
++}
++
++.login-card p {
++  margin: 0 0 18px 0;
++  color: #c8d8ff;
++  font-size: 0.95rem;
++}
++
++.login-card form {
++  display: flex;
++  flex-direction: column;
++  gap: 10px;
++}
++
++.login-card label {
++  font-size: 0.85rem;
++  color: #9bc9ff;
++}
++
++.login-card input {
++  padding: 10px;
++  border-radius: 10px;
++  border: 1px solid rgba(255, 255, 255, 0.12);
++  background: rgba(10, 15, 28, 0.9);
++  color: #e7f3ff;
++}
++
++.login-card button,
++.primary,
++.outline {
++  border: none;
++  padding: 10px 12px;
++  border-radius: 10px;
++  font-weight: 700;
++  cursor: pointer;
++  transition: 0.2s;
++}
++
++.login-card button,
++.primary {
++  background: linear-gradient(90deg, #00c6ff, #00ffd1);
++  color: #041018;
++}
++
++.outline {
++  background: transparent;
++  border: 1px solid rgba(155, 230, 255, 0.4);
++  color: #bce8ff;
++}
++
++.login-card button:disabled,
++.primary:disabled {
++  opacity: 0.5;
++  cursor: not-allowed;
++}
++
++.alert {
++  margin-top: 10px;
++  padding: 10px;
++  border-radius: 10px;
++  background: rgba(255, 99, 71, 0.15);
++  border: 1px solid rgba(255, 99, 71, 0.4);
++  color: #ffd1c7;
++}
++
++.athena-shell {
++  display: grid;
++  grid-template-columns: 280px 1fr;
++}
+ 
+ .athena-sidebar {
+-  width: 220px;
+-  background: rgba(4, 8, 20, 0.96);
+-  padding: 16px 12px;
++  background: rgba(4, 8, 20, 0.95);
++  border-right: 1px solid rgba(255, 255, 255, 0.08);
++  padding: 18px;
+   display: flex;
+   flex-direction: column;
+-  gap: 24px;
++  gap: 18px;
++  backdrop-filter: blur(18px);
+ }
+ 
+ .logo-mini {
+-  font-weight: 800;
+-  font-size: 1.2rem;
++  font-weight: 900;
+   letter-spacing: 0.18em;
+-  text-transform: uppercase;
+   color: #9be5ff;
+ }
+ 
+-.athena-sidebar ul {
+-  list-style: none;
+-  padding-left: 0;
+-  margin: 0;
++.user-block {
++  background: rgba(255, 255, 255, 0.03);
++  border: 1px solid rgba(255, 255, 255, 0.06);
++  border-radius: 12px;
++  padding: 12px;
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
+ }
+ 
+-.athena-sidebar li {
+-  padding: 8px 10px;
+-  margin-bottom: 4px;
+-  border-radius: 999px;
+-  color: #c5d6ff;
++.user-name {
++  font-weight: 700;
++}
++
++.user-role {
++  color: #9bc9ff;
+   font-size: 0.85rem;
++}
++
++.sidebar-section {
++  background: rgba(255, 255, 255, 0.02);
++  border: 1px solid rgba(255, 255, 255, 0.05);
++  border-radius: 12px;
++  padding: 12px;
++}
++
++.section-title {
++  font-size: 0.9rem;
++  color: #9bc9ff;
++  margin-bottom: 8px;
++}
++
++.chat-list {
++  list-style: none;
++  padding: 0;
++  margin: 8px 0 0 0;
++  display: flex;
++  flex-direction: column;
++  gap: 8px;
++}
++
++.chat-list li {
++  padding: 10px;
++  border-radius: 10px;
++  border: 1px solid rgba(255, 255, 255, 0.08);
++  background: rgba(255, 255, 255, 0.02);
+   cursor: pointer;
+-  transition: 0.2s;
+ }
+ 
+-.athena-sidebar li:hover {
+-  background: rgba(0, 173, 255, 0.16);
+-  color: #e4f4ff;
++.chat-list li.active {
++  border-color: rgba(0, 214, 255, 0.6);
++  box-shadow: 0 0 12px rgba(0, 214, 255, 0.25);
+ }
+ 
+-.athena-sidebar li.active {
+-  background: linear-gradient(90deg, #00b4ff, #00f5ff);
+-  color: #041018;
++.chat-list small {
++  display: block;
++  color: #8ea8c7;
++  margin-top: 4px;
++}
++
++.pill {
++  display: inline-flex;
++  padding: 6px 10px;
++  border-radius: 999px;
++  border: 1px solid rgba(0, 214, 255, 0.4);
++  color: #bce8ff;
++  margin-right: 6px;
++  font-size: 0.85rem;
+ }
+ 
+-/* MAIN */
++.empty {
++  color: #9baac5;
++  font-size: 0.9rem;
++}
+ 
+ .athena-main {
+-  flex: 1;
+-  padding: 24px 40px 40px 40px;
++  padding: 22px 30px;
+   color: white;
+ }
+ 
+-.athena-header-tag {
+-  display: inline-block;
+-  padding: 4px 12px;
+-  border-radius: 999px;
+-  border: 1px solid rgba(151, 221, 255, 0.7);
+-  background: rgba(9, 132, 227, 0.2);
+-  font-size: 0.7rem;
+-  letter-spacing: 0.22em;
++.athena-header .overline {
++  letter-spacing: 0.18em;
++  color: #9bc9ff;
+   text-transform: uppercase;
+-  color: #e3f6ff;
++  font-size: 0.72rem;
+ }
+ 
+-.athena-title {
+-  margin-top: 18px;
+-  margin-bottom: 10px;
+-  font-size: 2.8rem;
+-  font-weight: 900;
+-  letter-spacing: 0.08em;
++.athena-header h1 {
++  margin: 6px 0 6px 0;
++  font-size: 2rem;
+ }
+ 
+-.athena-subtitle {
+-  max-width: 720px;
+-  font-size: 1rem;
+-  line-height: 1.6;
+-  color: #d4e6ff;
++.subtitle {
++  margin: 0;
++  color: #c8d8ff;
+ }
+ 
+-/* GRID */
++.chat-window {
++  margin-top: 20px;
++  background: rgba(255, 255, 255, 0.03);
++  border: 1px solid rgba(255, 255, 255, 0.07);
++  border-radius: 16px;
++  display: flex;
++  flex-direction: column;
++  min-height: 400px;
++  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.4);
++}
+ 
+-.athena-grid {
+-  display: grid;
+-  grid-template-columns: repeat(3, minmax(0, 1fr));
+-  gap: 18px;
+-  margin-top: 28px;
+-}
+-
+-.athena-card {
+-  position: relative;
+-  border-radius: 22px;
+-  padding: 18px 18px 18px 18px;
+-  background: radial-gradient(circle at top left, rgba(120, 210, 255, 0.18), rgba(0, 0, 40, 0.9));
+-  border: 1px solid rgba(255, 255, 255, 0.16);
+-  box-shadow:
+-    0 12px 40px rgba(0, 0, 0, 0.75),
+-    inset 0 0 24px rgba(255, 255, 255, 0.04);
+-  backdrop-filter: blur(18px);
+-  transition: all 0.18s ease-out;
+-  cursor: pointer;
++.messages {
++  flex: 1;
++  padding: 18px;
++  overflow-y: auto;
++  display: flex;
++  flex-direction: column;
++  gap: 12px;
+ }
+ 
+-.athena-card:hover {
+-  transform: translateY(-6px) scale(1.01);
+-  box-shadow:
+-    0 22px 60px rgba(0, 0, 0, 0.9),
+-    0 0 38px rgba(0, 255, 255, 0.18);
+-  border-color: rgba(144, 224, 239, 0.7);
++.msg {
++  padding: 12px;
++  border-radius: 12px;
++  background: rgba(255, 255, 255, 0.03);
++  border: 1px solid rgba(255, 255, 255, 0.05);
+ }
+ 
+-.athena-card-icon {
+-  font-size: 1.6rem;
+-  margin-bottom: 6px;
++.msg.user {
++  border-color: rgba(0, 214, 255, 0.4);
+ }
+ 
+-.athena-card-title {
+-  font-size: 1rem;
++.msg-role {
+   font-weight: 700;
+-  letter-spacing: 0.06em;
+-  text-transform: uppercase;
+-  margin-bottom: 4px;
++  color: #9bc9ff;
+ }
+ 
+-.athena-card-text {
+-  font-size: 0.85rem;
+-  color: #d0e4ff;
++.msg-content {
++  margin: 6px 0;
+   line-height: 1.5;
+-  margin-bottom: 10px;
+ }
+ 
+-.athena-card-tag {
+-  display: inline-block;
+-  font-size: 0.7rem;
+-  padding: 2px 8px;
+-  border-radius: 999px;
+-  border: 1px solid rgba(144, 224, 239, 0.6);
+-  background: rgba(0, 168, 255, 0.18);
++.msg-time {
++  color: #8ea8c7;
++  font-size: 0.8rem;
+ }
+ 
+-.athena-footer {
+-  margin-top: 20px;
+-  font-size: 0.7rem;
+-  text-align: right;
+-  color: #c4ddff;
++.composer {
++  padding: 12px;
++  border-top: 1px solid rgba(255, 255, 255, 0.07);
++  display: flex;
++  gap: 12px;
+ }
+ 
+-/* RESPONSIVO */
++.composer textarea {
++  flex: 1;
++  min-height: 80px;
++  border-radius: 12px;
++  border: 1px solid rgba(255, 255, 255, 0.08);
++  background: rgba(7, 10, 18, 0.8);
++  color: white;
++  padding: 12px;
++}
+ 
+-@media (max-width: 1100px) {
+-  .athena-grid {
+-    grid-template-columns: repeat(2, minmax(0, 1fr));
+-  }
++.admin-panel {
++  margin-top: 24px;
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
++  gap: 16px;
++}
++
++.table {
++  border: 1px solid rgba(255, 255, 255, 0.08);
++  border-radius: 12px;
++  overflow: hidden;
++}
++
++.table-row {
++  display: grid;
++  grid-template-columns: 1.6fr 1fr 1fr;
++  padding: 10px 12px;
++  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
++}
++
++.table-head {
++  background: rgba(255, 255, 255, 0.06);
++  font-weight: 700;
++}
++
++.muted {
++  color: #9baac5;
++  margin-top: 0;
++}
++
++.pill-list {
++  list-style: none;
++  padding: 0;
++  margin: 0;
++  display: flex;
++  flex-wrap: wrap;
++  gap: 8px;
++}
++
++.pill-list li {
++  padding: 8px 12px;
++  border-radius: 12px;
++  background: rgba(0, 214, 255, 0.12);
++  border: 1px solid rgba(0, 214, 255, 0.28);
++  color: #c8f1ff;
+ }
+ 
+-@media (max-width: 800px) {
+-  .athena-root {
+-    flex-direction: column;
++@media (max-width: 960px) {
++  .athena-shell {
++    grid-template-columns: 1fr;
+   }
+ 
+   .athena-sidebar {
+-    width: 100%;
+     flex-direction: row;
+-    align-items: center;
+-    gap: 8px;
++    gap: 10px;
++    flex-wrap: wrap;
+   }
+ 
+-  .athena-main {
+-    padding: 16px;
+-  }
+-
+-  .athena-grid {
+-    grid-template-columns: 1fr;
++  .chat-window {
++    min-height: 340px;
+   }
+ }
+diff --git a/frontend/src/App.tsx b/frontend/src/App.tsx
+index 29fd8466b07eee93a7c94b2d412a5fd7f111a1f1..0bc626c41dcac928f0647892d853aa5ac8c38e0a 100644
+--- a/frontend/src/App.tsx
++++ b/frontend/src/App.tsx
+@@ -1,129 +1,328 @@
++import type { FormEvent } from "react";
++import { useEffect, useMemo, useState } from "react";
+ import "./App.css";
+ import bg from "./assets/bg_athena.jpg";
+ 
++type User = {
++  id: number;
++  email: string;
++  full_name?: string | null;
++  is_admin: boolean;
++  created_at: string;
++};
++
++type Chat = {
++  id: number;
++  title: string;
++  created_at: string;
++};
++
++type Message = {
++  id: number;
++  role: "user" | "assistant";
++  content: string;
++  created_at: string;
++};
++
++const sanitizeUrl = (url: string | undefined | null) =>
++  url?.trim().replace(/\/$/, "");
++
++const API_URL =
++  sanitizeUrl(import.meta.env.VITE_API_URL) ||
++  (typeof window !== "undefined" ? sanitizeUrl(window.location.origin) : undefined) ||
++  "http://localhost:8000";
++
+ function App() {
+-  const cardsRow1 = [
+-    {
+-      icon: "🧠",
+-      title: "ATHENA IA",
+-      text: "Assistente especialista treinado com dados internos da Estácio para responder perguntas, gerar análises e apoiar decisões.",
+-      tag: "IA Especialista",
+-    },
+-    {
+-      icon: "📍",
+-      title: "NEURAL MAP",
+-      text: "Mapa inteligente que cruza CEP, mercado, captação e evasão, revelando oportunidades e riscos por região.",
+-      tag: "Mapa Estratégico",
+-    },
+-    {
+-      icon: "📊",
+-      title: "ATHENA OPS",
+-      text: "Digital Twin da operação: simula cenários de mídia, ticket, base, evasão e prevê impacto em ROL.",
+-      tag: "Digital Twin",
+-    },
+-  ];
+-
+-  const cardsRow2 = [
+-    {
+-      icon: "⚠️",
+-      title: "ATHENA DNA",
+-      text: "Sistema de riscos com score por núcleo: identifica sinais precoces de queda de captação, evasão ou perda de share.",
+-      tag: "Gestão de Riscos",
+-    },
+-    {
+-      icon: "📈",
+-      title: "FORECAST 360",
+-      text: "Visão completa do futuro: previsões financeiras, comerciais, acadêmicas e de mercado em um único painel.",
+-      tag: "Previsão 360º",
+-    },
+-    {
+-      icon: "🧾",
+-      title: "ATHENA GEN & ORACLE",
+-      text: "Gera planos comerciais/ acadêmicos e responde perguntas complexas sobre impacto financeiro e operacional.",
+-      tag: "Planos & Perguntas",
+-    },
+-  ];
+-
+-  const handleCardClick = (module: string) => {
+-    // Aqui depois vamos navegar para páginas reais (React Router) ou abrir modais.
+-    alert(`(MVP) Você clicou no módulo: ${module}`);
++  const [email, setEmail] = useState("admin@athena.local");
++  const [password, setPassword] = useState("admin123");
++  const [token, setToken] = useState<string | null>(null);
++  const [user, setUser] = useState<User | null>(null);
++  const [chats, setChats] = useState<Chat[]>([]);
++  const [selectedChat, setSelectedChat] = useState<number | null>(null);
++  const [messages, setMessages] = useState<Message[]>([]);
++  const [question, setQuestion] = useState("");
++  const [loading, setLoading] = useState(false);
++  const [error, setError] = useState<string | null>(null);
++  const [adminUsers, setAdminUsers] = useState<User[]>([]);
++  const [policies, setPolicies] = useState<string[]>([]);
++
++  const headers = useMemo(
++    () => ({
++      "Content-Type": "application/json",
++      Authorization: token ? `Bearer ${token}` : "",
++    }),
++    [token]
++  );
++
++  useEffect(() => {
++    const savedToken = localStorage.getItem("athena_token");
++    if (savedToken) {
++      setToken(savedToken);
++    }
++  }, []);
++
++  useEffect(() => {
++    if (!token) return;
++    fetchProfile(token);
++  }, [token]);
++
++  const fetchProfile = async (authToken: string) => {
++    try {
++      const res = await fetch(`${API_URL}/auth/me`, { headers: { Authorization: `Bearer ${authToken}` } });
++      if (!res.ok) throw new Error("Falha ao buscar usuário");
++      const data = await res.json();
++      setUser(data);
++      await Promise.all([loadChats(authToken), data.is_admin ? loadAdminData(authToken) : Promise.resolve()]);
++    } catch (err: any) {
++      setError(err.message);
++      setToken(null);
++      localStorage.removeItem("athena_token");
++    }
++  };
++
++  const loadChats = async (authToken: string = token ?? "") => {
++    const res = await fetch(`${API_URL}/chats`, { headers: { Authorization: `Bearer ${authToken}` } });
++    if (!res.ok) return;
++    const data = await res.json();
++    setChats(data);
++    if (data.length && !selectedChat) {
++      setSelectedChat(data[0].id);
++      loadMessages(data[0].id, authToken);
++    }
++  };
++
++  const loadMessages = async (chatId: number, authToken: string = token ?? "") => {
++    const res = await fetch(`${API_URL}/chats/${chatId}/messages`, { headers: { Authorization: `Bearer ${authToken}` } });
++    if (res.ok) {
++      const data = await res.json();
++      setMessages(data);
++    }
++  };
++
++  const loadAdminData = async (authToken: string = token ?? "") => {
++    const [usersRes, policiesRes] = await Promise.all([
++      fetch(`${API_URL}/admin/users`, { headers: { Authorization: `Bearer ${authToken}` } }),
++      fetch(`${API_URL}/admin/policies`, { headers: { Authorization: `Bearer ${authToken}` } }),
++    ]);
++
++    if (usersRes.ok) setAdminUsers(await usersRes.json());
++    if (policiesRes.ok) setPolicies(await policiesRes.json());
++  };
++
++  const handleLogin = async (e: FormEvent) => {
++    e.preventDefault();
++    setLoading(true);
++    setError(null);
++    try {
++      const res = await fetch(`${API_URL}/auth/login`, {
++        method: "POST",
++        headers: { "Content-Type": "application/json" },
++        body: JSON.stringify({ email, password }),
++      });
++      if (!res.ok) throw new Error("Login inválido");
++      const data = await res.json();
++      setToken(data.access_token);
++      localStorage.setItem("athena_token", data.access_token);
++    } catch (err: any) {
++      setError(err.message);
++    } finally {
++      setLoading(false);
++    }
++  };
++
++  const handleCreateChat = async () => {
++    if (!token) return;
++    const res = await fetch(`${API_URL}/chats`, {
++      method: "POST",
++      headers,
++      body: JSON.stringify({ title: "Nova conversa" }),
++    });
++    if (!res.ok) return;
++    const chat = await res.json();
++    setChats((prev) => [chat, ...prev]);
++    setSelectedChat(chat.id);
++    setMessages([]);
++  };
++
++  const handleSend = async () => {
++    if (!token || !question.trim()) return;
++
++    let chatId = selectedChat;
++    if (!chatId) {
++      const res = await fetch(`${API_URL}/chats`, {
++        method: "POST",
++        headers,
++        body: JSON.stringify({ title: "Nova conversa" }),
++      });
++      const chat = await res.json();
++      chatId = chat.id;
++      setSelectedChat(chatId);
++      setChats((prev) => [chat, ...prev]);
++    }
++
++    setLoading(true);
++    const res = await fetch(`${API_URL}/chats/${chatId}/ask`, {
++      method: "POST",
++      headers,
++      body: JSON.stringify({ question }),
++    });
++
++    if (res.ok) {
++      const data = await res.json();
++      setMessages(data);
++      setQuestion("");
++    }
++    setLoading(false);
++  };
++
++  const handleLogout = () => {
++    setToken(null);
++    setUser(null);
++    setChats([]);
++    setMessages([]);
++    localStorage.removeItem("athena_token");
+   };
+ 
++  if (!token || !user) {
++    return (
++      <div className="athena-login" style={{ backgroundImage: `url(${bg})` }}>
++        <div className="login-card">
++          <h1>ATHENA · Painel Seguro</h1>
++          <p>Faça login para acessar os chats e o painel administrativo.</p>
++          <form onSubmit={handleLogin}>
++            <label>E-mail institucional</label>
++            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
++
++            <label>Senha</label>
++            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
++
++            <button type="submit" disabled={loading}>
++              {loading ? "Entrando..." : "Entrar"}
++            </button>
++          </form>
++          {error && <div className="alert">{error}</div>}
++        </div>
++      </div>
++    );
++  }
++
+   return (
+-    <div
+-      className="athena-root"
+-      style={{ backgroundImage: `url(${bg})` }}
+-    >
++    <div className="athena-shell" style={{ backgroundImage: `url(${bg})` }}>
+       <aside className="athena-sidebar">
+         <div className="logo-mini">ATHENA</div>
+-        <nav>
+-          <ul>
+-            <li className="active">Dashboard</li>
+-            <li>ATHENA IA</li>
+-            <li>Neural Map</li>
+-            <li>Athena OPS</li>
+-            <li>Athena DNA</li>
+-            <li>Forecast 360</li>
+-            <li>Athena GEN & Oracle</li>
++        <div className="user-block">
++          <div className="user-name">{user.full_name || user.email}</div>
++          <div className="user-role">{user.is_admin ? "Administrador" : "Usuário"}</div>
++          <button className="outline" onClick={handleLogout}>
++            Sair
++          </button>
++        </div>
++
++        <div className="sidebar-section">
++          <div className="section-title">Conversas</div>
++          <button className="primary" onClick={handleCreateChat}>
++            + Nova conversa
++          </button>
++          <ul className="chat-list">
++            {chats.map((c) => (
++              <li
++                key={c.id}
++                className={c.id === selectedChat ? "active" : ""}
++                onClick={() => {
++                  setSelectedChat(c.id);
++                  loadMessages(c.id);
++                }}
++              >
++                <span>{c.title}</span>
++                <small>{new Date(c.created_at).toLocaleString("pt-BR")}</small>
++              </li>
++            ))}
++            {!chats.length && <li className="empty">Nenhuma conversa criada ainda.</li>}
+           </ul>
+-        </nav>
++        </div>
++
++        {user.is_admin && (
++          <div className="sidebar-section">
++            <div className="section-title">Administração</div>
++            <div className="pill">{adminUsers.length} usuários</div>
++            <div className="pill">{policies.length} políticas</div>
++          </div>
++        )}
+       </aside>
+ 
+       <main className="athena-main">
+-        <header className="athena-header-tag">
+-          PROJETO ATHENA · INTELIGÊNCIA CORPORATIVA ESTÁCIO
++        <header className="athena-header">
++          <div>
++            <p className="overline">Projeto ATHENA · Inteligência Corporativa Estácio</p>
++            <h1>IA Especialista + Painel Operacional</h1>
++            <p className="subtitle">
++              Chat seguro com base em políticas internas, múltiplas conversas por usuário e visão administrativa para
++              governança.
++            </p>
++          </div>
+         </header>
+ 
+-        <h1 className="athena-title">
+-          O CÉREBRO DIGITAL DA
+-          <br />
+-          REGIONAL SUDESTE
+-        </h1>
+-
+-        <p className="athena-subtitle">
+-          Plataforma proprietária de IA, <strong>simulação</strong> e{" "}
+-          <strong>diagnóstico</strong> que conecta resultados financeiros,
+-          captação, evasão e operação acadêmica, transformando a Regional
+-          Sudeste em um <strong>Digital Twin</strong> vivo da Estácio.
+-        </p>
+-
+-        <section className="athena-grid">
+-          {cardsRow1.map((c) => (
+-            <div
+-              key={c.title}
+-              className="athena-card"
+-              onClick={() => handleCardClick(c.title)}
+-            >
+-              <div className="athena-card-icon">{c.icon}</div>
+-              <div className="athena-card-title">{c.title}</div>
+-              <div className="athena-card-text">{c.text}</div>
+-              <div className="athena-card-tag">• {c.tag}</div>
+-            </div>
+-          ))}
++        <section className="chat-window">
++          <div className="messages">
++            {messages.map((m) => (
++              <div key={m.id} className={`msg ${m.role}`}>
++                <div className="msg-role">{m.role === "user" ? "Você" : "Athena"}</div>
++                <div className="msg-content">{m.content}</div>
++                <div className="msg-time">{new Date(m.created_at).toLocaleString("pt-BR")}</div>
++              </div>
++            ))}
++            {!messages.length && <div className="empty">Envie uma pergunta para começar.</div>}
++          </div>
++          <div className="composer">
++            <textarea
++              placeholder="Pergunte à Athena sobre políticas internas ou processos da Estácio"
++              value={question}
++              onChange={(e) => setQuestion(e.target.value)}
++              disabled={loading}
++            />
++            <button className="primary" onClick={handleSend} disabled={loading}>
++              {loading ? "Gerando resposta..." : "Enviar"}
++            </button>
++          </div>
+         </section>
+ 
+-        <section className="athena-grid">
+-          {cardsRow2.map((c) => (
+-            <div
+-              key={c.title}
+-              className="athena-card"
+-              onClick={() => handleCardClick(c.title)}
+-            >
+-              <div className="athena-card-icon">{c.icon}</div>
+-              <div className="athena-card-title">{c.title}</div>
+-              <div className="athena-card-text">{c.text}</div>
+-              <div className="athena-card-tag">• {c.tag}</div>
++        {user.is_admin && (
++          <section className="admin-panel">
++            <div>
++              <h2>Usuários</h2>
++              <p className="muted">Gerencie quem acessa a IA e as conversas.</p>
++              <div className="table">
++                <div className="table-row table-head">
++                  <div>E-mail</div>
++                  <div>Perfil</div>
++                  <div>Cadastro</div>
++                </div>
++                {adminUsers.map((u) => (
++                  <div className="table-row" key={u.id}>
++                    <div>{u.email}</div>
++                    <div>{u.is_admin ? "Administrador" : "Usuário"}</div>
++                    <div>{new Date(u.created_at).toLocaleDateString("pt-BR")}</div>
++                  </div>
++                ))}
++                {!adminUsers.length && <div className="empty">Nenhum usuário adicional encontrado.</div>}
++              </div>
+             </div>
+-          ))}
+-        </section>
+ 
+-        <footer className="athena-footer">
+-          Projeto ATHENA · Desenvolvido por Gustavo Moreira · Regional Sudeste
+-          Estácio
+-        </footer>
++            <div>
++              <h2>Políticas ingeridas</h2>
++              <p className="muted">Arquivos monitorados para o RAG e watcher em segundo plano.</p>
++              <ul className="pill-list">
++                {policies.map((p) => (
++                  <li key={p}>{p}</li>
++                ))}
++                {!policies.length && <li className="empty">Nenhum arquivo em policies/</li>}
++              </ul>
++            </div>
++          </section>
++        )}
+       </main>
+     </div>
+   );
+ }
+ 
+ export default App;

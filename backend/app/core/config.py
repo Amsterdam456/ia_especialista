@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # ROTAS
-    API_V1_PREFIX: str = "/athena"
+    API_V1_PREFIX: str = "/api/v1"
 
     # Embeddings
     EMBEDDINGS_FILE: str = "data/embeddings.pkl"
@@ -17,6 +17,18 @@ class Settings(BaseSettings):
 
     # Watcher
     CHECK_INTERVAL_SECONDS: int = 30
+
+    # Auth
+    SECRET_KEY: str = "change-me"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 720
+
+    # Database
+    DATABASE_URL: str = "sqlite:///./data/athena.db"
+
+    # Admin bootstrap
+    ADMIN_EMAIL: str = "admin@athena.local"
+    ADMIN_PASSWORD: str = "admin123"
 
     class Config:
         env_file = ".env"

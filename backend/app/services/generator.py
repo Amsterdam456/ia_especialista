@@ -1,10 +1,11 @@
 # app/services/generator.py
 
-import os
 import requests
 
-LMSTUDIO_API_URL = os.getenv("LMSTUDIO_API_URL", "http://localhost:1234/v1/chat/completions")
-MODEL_NAME = os.getenv("LMSTUDIO_MODEL", "phi-3.5-mini-3.8b-arliai-rpmax-v1.1")
+from app.core.config import settings
+
+LMSTUDIO_API_URL = settings.LMSTUDIO_API_URL
+MODEL_NAME = settings.LMSTUDIO_MODEL
 
 
 def generate_answer(context: str, question: str) -> str:
@@ -30,10 +31,10 @@ Se a política não cobre o assunto, diga claramente: "Essa política não trata
         "model": MODEL_NAME,
         "messages": [
             {"role": "system", "content": "Você é a IA corporativa Athena, objetiva e precisa."},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": prompt},
         ],
         "temperature": 0.1,
-        "max_tokens": 700
+        "max_tokens": 700,
     }
 
     try:
