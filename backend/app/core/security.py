@@ -1,18 +1,18 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import HTTPException, Depends, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.deps import get_db
-from app.db import models
+from app.db.session import get_session
+from app.models import User
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login")
 
 
 class TokenData:
@@ -39,7 +39,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 def decode_token(token: str) -> TokenData:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Não foi possível validar as credenciais",
+        detail="Nao foi possivel validar as credenciais",
         headers={"WWW-Authenticate": "Bearer"},
     )
 
@@ -53,15 +53,15 @@ def decode_token(token: str) -> TokenData:
         raise credentials_exception
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> models.User:
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_session)) -> User:
     token_data = decode_token(token)
-    user = db.query(models.User).filter(models.User.id == token_data.user_id).first()
+    user = db.query(User).filter(User.id == token_data.user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+        raise HTTPException(status_code=404, detail="Usuario nao encontrado")
     return user
 
 
-def get_current_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
+def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     if not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Apenas administradores")
     return current_user

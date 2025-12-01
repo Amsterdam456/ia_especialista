@@ -1,48 +1,50 @@
-# app/services/generator.py
+import uuid
 
 import requests
 
+from app.core.athena_prompt import ATHENA_SYSTEM_PROMPT
 from app.core.config import settings
-
-LMSTUDIO_API_URL = settings.LMSTUDIO_API_URL
-MODEL_NAME = settings.LMSTUDIO_MODEL
+from app.services.embeddings import get_relevant_chunks
 
 
-def generate_answer(context: str, question: str) -> str:
-    """
-    Gera resposta usando LM Studio como motor LLM local.
-    """
+class ChatGenerationError(Exception):
+    """Erro ao gerar resposta do modelo."""
 
-    prompt = f"""
-Você é a IA ATHENA, especialista em interpretar políticas internas da Estácio/YDUQS.
 
-Base de conhecimento relevante (RAG):
-
-{context}
-
-Pergunta:
-{question}
-
-Responda com extrema precisão, apenas com base no texto acima.
-Se a política não cobre o assunto, diga claramente: "Essa política não trata sobre isso."
-"""
-
-    body = {
-        "model": MODEL_NAME,
-        "messages": [
-            {"role": "system", "content": "Você é a IA corporativa Athena, objetiva e precisa."},
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.1,
-        "max_tokens": 700,
+def call_llm_api(messages: list[dict]) -> dict:
+    """Chama endpoint de chat completion configurado e retorna payload completo."""
+    payload = {
+        "model": settings.LMSTUDIO_MODEL,
+        "messages": messages,
+        "temperature": 0.25,
+        "max_tokens": 800,
     }
+    try:
+        response = requests.post(settings.LMSTUDIO_API_URL, json=payload, timeout=120)
+        response.raise_for_status()
+        data = response.json()
+    except Exception as exc:  # noqa: BLE001
+        raise ChatGenerationError(f"Falha ao chamar modelo: {exc}") from exc
 
     try:
-        resp = requests.post(LMSTUDIO_API_URL, json=body)
-        resp.raise_for_status()
+        content = data["choices"][0]["message"]["content"]
+    except Exception as exc:  # noqa: BLE001
+        raise ChatGenerationError("Resposta invalida do modelo") from exc
 
-        data = resp.json()
-        return data["choices"][0]["message"]["content"].strip()
+    return {"id": str(uuid.uuid4()), "content": content, "raw": data}
 
-    except Exception as e:
-        return f"Erro ao gerar resposta: {e}"
+
+def generate_answer_with_history(question: str, history: list[dict]) -> dict:
+    """Gera resposta usando historico do chat e contexto das politicas."""
+    context = get_relevant_chunks(question)
+    system_content = (
+        ATHENA_SYSTEM_PROMPT
+        + "\n\n--- CONTEXTO DAS POLÍTICAS ---\n"
+        + (context or "Nenhum trecho relevante de política foi encontrado para esta pergunta.")
+    )
+
+    messages = [{"role": "system", "content": system_content}] + history + [
+        {"role": "user", "content": question}
+    ]
+
+    return call_llm_api(messages)

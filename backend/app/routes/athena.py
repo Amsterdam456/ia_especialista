@@ -1,22 +1,18 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
-from app.services.embeddings import search_similar_documents
-from app.services.generator import generate_answer
+
+from app.schemas import AskRequest, AskResponse, Envelope, StatusResponse
+from app.services.athena_core import athena_answer
 
 router = APIRouter()
 
-class Query(BaseModel):
-    question: str
 
-@router.post("/ask")
-def ask_athena(query: Query):
-    hits = search_similar_documents(query.question, k=4)
+@router.get("/health", response_model=Envelope[StatusResponse])
+def health_check():
+    return Envelope(success=True, data=StatusResponse())
 
-    if not hits:
-        return {"answer": "Ainda não tenho conhecimento suficiente para responder."}
 
-    context = "\n\n".join(h["text"] for h in hits)
-
-    answer = generate_answer(context, query.question)
-
-    return {"answer": answer}
+@router.post("/ask", response_model=Envelope[AskResponse])
+def ask_athena(payload: AskRequest):
+    result = athena_answer(payload.question)
+    response = AskResponse(answer=result.get("answer", ""), meta=result.get("meta"))
+    return Envelope(success=True, data=response)

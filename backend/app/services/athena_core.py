@@ -1,24 +1,15 @@
-"""
-Aqui ficará o cérebro real do Athena (RAG, embeddings, Oracle, etc.).
-Por enquanto, só um stub bonitinho para conectar o front.
-"""
+"""Stub de resposta da ATHENA para integração inicial."""
 
 from typing import Dict
 
 
 def athena_answer(question: str) -> Dict:
-    # 🔹 Aqui depois vamos chamar FAISS + modelo local + dados Estácio.
-    # Por enquanto, devolvemos uma resposta fake bem formatada.
     return {
         "answer": (
-            "Ainda estou na versão inicial (stub), mas em breve estarei conectado "
-            "aos dados financeiros e de captação da Estácio. "
-            f"Você perguntou: '{question}'.\n\n"
-            "Na próxima fase, vou buscar nos data lakes internos e retornar "
-            "análises, riscos e recomendações detalhadas."
+            "Ainda estou na versao inicial (stub), mas em breve estarei conectado "
+            "aos dados internos da Estacio. "
+            f"Voce perguntou: '{question}'.\n\n"
+            "Na proxima fase, vou buscar nos data lakes e retornar analises, riscos e recomendacoes."
         ),
-        "meta": {
-            "source": "athena_stub",
-            "confidence": 0.42,
-        },
+        "meta": {"source": "athena_stub", "confidence": 0.42},
     }
