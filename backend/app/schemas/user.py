@@ -24,3 +24,8 @@ class UserOut(UserBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PasswordChange(BaseModel):
+    old_password: Optional[str] = None
+    new_password: str

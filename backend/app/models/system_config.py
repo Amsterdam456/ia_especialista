@@ -11,7 +11,7 @@ class SystemConfig(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
     system_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
-    model_name: Mapped[str] = mapped_column(String, default="phi-3.5-mini-3.8b-arliai-rpmax-v1.1")
+    model_name: Mapped[str] = mapped_column(String, default="qwen2.5-7b-instruct-1m")
     temperature: Mapped[float] = mapped_column(Float, default=0.25)
     top_p: Mapped[float] = mapped_column(Float, default=1.0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

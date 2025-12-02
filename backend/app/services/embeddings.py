@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import List, Dict
+from typing import Dict, List
 
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -12,7 +12,7 @@ model = SentenceTransformer(MODEL_NAME)
 
 EMBEDDINGS_FILE = settings.EMBEDDINGS_FILE
 
-# Estrutura na memória
+# Estrutura em memória
 emb_store: List[Dict] = []
 
 
@@ -20,7 +20,7 @@ emb_store: List[Dict] = []
 # HELPERS
 # --------------------------
 
-def reset_embeddings():
+def reset_embeddings() -> None:
     """Limpa vetorizações em memória e arquivo."""
     global emb_store
     emb_store = []
@@ -29,7 +29,7 @@ def reset_embeddings():
         os.remove(EMBEDDINGS_FILE)
 
 
-def store_embeddings(text_chunks: List[Dict]):
+def store_embeddings(text_chunks: List[Dict]) -> None:
     """
     Recebe uma lista de chunks no formato:
     {
@@ -48,13 +48,15 @@ def store_embeddings(text_chunks: List[Dict]):
 
         emb = model.encode(text, convert_to_numpy=True)
 
-        emb_store.append({
-            "text": text,
-            "embedding": emb,
-            "source": item["source"],
-            "page": item["page"],
-            "order": item["order"],
-        })
+        emb_store.append(
+            {
+                "text": text,
+                "embedding": emb,
+                "source": item["source"],
+                "page": item["page"],
+                "order": item["order"],
+            }
+        )
 
     # Persistência
     os.makedirs(os.path.dirname(EMBEDDINGS_FILE) or "data", exist_ok=True)
@@ -62,7 +64,7 @@ def store_embeddings(text_chunks: List[Dict]):
         pickle.dump(emb_store, f)
 
 
-def load_embeddings():
+def load_embeddings() -> None:
     """Carrega embeddings do disco."""
     global emb_store
 
@@ -92,29 +94,34 @@ def search_similar_documents(query: str, k: int = 5) -> List[Dict]:
     for item in emb_store:
         score = _cosine_similarity(query_emb, item["embedding"])
 
-        scored.append({
-            "text": item["text"],
-            "source": item["source"],
-            "page": item["page"],
-            "order": item["order"],
-            "score": score,
-        })
+        scored.append(
+            {
+                "text": item["text"],
+                "source": item["source"],
+                "page": item["page"],
+                "order": item["order"],
+                "score": score,
+            }
+        )
 
     scored.sort(key=lambda x: x["score"], reverse=True)
     return scored[:k]
 
 
-def get_relevant_chunks(query: str, k: int = 5) -> str:
-    """Retorna os melhores trechos formatados para o modelo."""
+def get_relevant_chunks(query: str, k: int = 3, max_chars: int = 4000) -> str:
+    """Retorna os melhores trechos formatados para o modelo, com limite de tamanho."""
     matches = search_similar_documents(query, k)
 
     if not matches:
         return ""
 
-    formatted = []
+    formatted: list[str] = []
+    total_chars = 0
     for m in matches:
-        formatted.append(
-            f"[Documento: {m['source']} | Página {m['page']}] Trecho:\n{m['text']}"
-        )
+        snippet = f"[Documento: {m['source']} | Pagina {m['page']}] Trecho:\n{m['text']}"
+        total_chars += len(snippet)
+        formatted.append(snippet)
+        if total_chars >= max_chars:
+            break
 
     return "\n\n".join(formatted)

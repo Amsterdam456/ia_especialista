@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     EMBEDDINGS_FILE: str = "data/embeddings.pkl"
     POLICY_DIR: str = "policies"
 
-    LMSTUDIO_API_URL: str = "http://localhost:1234/v1/chat/completions"
-    LMSTUDIO_MODEL: str = "phi-3.5-mini-3.8b-arliai-rpmax-v1.1"
+    LMSTUDIO_API_URL: str = "http://127.0.0.1:1234/v1/responses"
+    LMSTUDIO_MODEL: str = "qwen2.5-7b-instruct-1m"
 
     CHECK_INTERVAL_SECONDS: int = 30
 

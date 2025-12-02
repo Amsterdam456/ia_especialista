@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import List
+import csv
+import io
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_admin, get_password_hash
@@ -212,3 +215,45 @@ def list_audit(_: User = Depends(get_current_admin), db: Session = Depends(get_s
 def list_feedback(_: User = Depends(get_current_admin), db: Session = Depends(get_session)):
     feedback = db.query(ChatFeedback).order_by(ChatFeedback.created_at.desc()).limit(200).all()
     return Envelope(success=True, data=feedback)
+
+
+# ---------------- Bulk users ----------------
+@router.post("/users/bulk", response_model=Envelope[dict])
+def create_users_bulk(
+    file: UploadFile = File(...),
+    _: User = Depends(get_current_admin),
+    db: Session = Depends(get_session),
+):
+    content = file.file.read()
+    text = content.decode("utf-8", errors="ignore")
+    reader = csv.DictReader(io.StringIO(text))
+    created = 0
+    errors = []
+    for idx, row in enumerate(reader, start=1):
+        email = (row.get("email") or "").strip()
+        full_name = (row.get("full_name") or "").strip()
+        role = (row.get("role") or "usuario").strip().lower()
+        if not email:
+            errors.append(f"Linha {idx}: email vazio")
+            continue
+        exists = db.query(User).filter(User.email == email).first()
+        if exists:
+            errors.append(f"Linha {idx}: email já existe")
+            continue
+        hashed = get_password_hash("123")
+        is_admin = role == "admin"
+        user = User(email=email, full_name=full_name, hashed_password=hashed, is_admin=is_admin)
+        db.add(user)
+        created += 1
+    db.commit()
+    return Envelope(success=True, data={"created": created, "errors": errors})
+
+
+@router.get("/users/template", response_model=None)
+def download_users_template(_: User = Depends(get_current_admin)):
+    csv_content = "email,full_name,role\nuser1@example.com,Nome 1,usuario\nuser2@example.com,Nome 2,moderador\n"
+    return StreamingResponse(
+        iter([csv_content]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=template_usuarios.csv"},
+    )

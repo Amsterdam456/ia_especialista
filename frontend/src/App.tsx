@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import HomeDashboard from "./pages/HomeDashboard";
 import AthenaIaChatPage from "./pages/AthenaIaChatPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import ProfilePage from "./pages/ProfilePage";
 import { getMe } from "./services/api";
 import type { User } from "./types";
 
@@ -85,6 +86,23 @@ function AdminWrapper() {
   );
 }
 
+function ProfileWrapper() {
+  const auth = useAuth();
+  const navigate = useNavigate();
+  if (!auth?.user || !auth.token) return <Navigate to="/login" replace />;
+  return (
+    <ProfilePage
+      user={auth.user}
+      token={auth.token}
+      onBack={() => navigate("/home")}
+      onLogout={() => {
+        auth.logout();
+        navigate("/login");
+      }}
+    />
+  );
+}
+
 export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -143,9 +161,8 @@ export default function App() {
             path="/login"
             element={
               <LoginPage
-                onLoginSuccess={(tok, usr, navigate) => {
+                onLoginSuccess={(tok, usr) => {
                   setAuth(tok, usr);
-                  navigate("/home"); // CORREÇÃO: sem window.location.href
                 }}
               />
             }
@@ -175,6 +192,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ChatWrapper />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfileWrapper />
               </ProtectedRoute>
             }
           />

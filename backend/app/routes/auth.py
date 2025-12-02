@@ -9,6 +9,7 @@ from app.core.security import create_access_token, get_current_user, get_passwor
 from app.db.session import get_session
 from app.models import User
 from app.schemas import AuthResponse, Envelope, Token, UserCreate, UserLogin, UserOut
+from app.schemas.user import PasswordChange
 
 router = APIRouter(prefix="/auth")
 
@@ -43,3 +44,22 @@ def login(payload: UserLogin, db: Session = Depends(get_session)):
 @router.get("/me", response_model=Envelope[UserOut])
 def me(current_user: User = Depends(get_current_user)):
     return Envelope(success=True, data=current_user)
+
+
+@router.post("/change-password", response_model=Envelope[bool])
+def change_password(payload: PasswordChange, db: Session = Depends(get_session), current_user: User = Depends(get_current_user)):
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+
+    # Opcional: validar senha antiga se enviada
+    if payload.old_password:
+        from app.core.auth import verify_password
+
+        if not verify_password(payload.old_password, user.hashed_password):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Senha atual inválida")
+
+    user.hashed_password = get_password_hash(payload.new_password)
+    db.add(user)
+    db.commit()
+    return Envelope(success=True, data=True)

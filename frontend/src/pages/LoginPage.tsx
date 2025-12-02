@@ -7,7 +7,7 @@ import { login } from "../services/api";
 import type { User } from "../types";
 
 type Props = {
-  onLoginSuccess: (token: string, user: User, navigate: any) => void;
+  onLoginSuccess: (token: string, user: User) => void;
 };
 
 export default function LoginPage({ onLoginSuccess }: Props) {
@@ -25,7 +25,8 @@ export default function LoginPage({ onLoginSuccess }: Props) {
     try {
       const data = await login(email, password);
       localStorage.setItem("athena_token", data.access_token);
-      onLoginSuccess(data.access_token, data.user as User, navigate);
+      onLoginSuccess(data.access_token, data.user as User);
+      navigate("/home");
     } catch (err: any) {
       setError(err.message || "Erro ao fazer login");
     } finally {
@@ -49,9 +50,9 @@ export default function LoginPage({ onLoginSuccess }: Props) {
           <label>Senha</label>
           <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
 
-          <GlassButton type="submit" disabled={loading}>
+          <button className="chat-pill" type="submit" disabled={loading}>
             {loading ? "Entrando..." : "Entrar"}
-          </GlassButton>
+          </button>
         </form>
 
         {error && <div className="alert">{error}</div>}

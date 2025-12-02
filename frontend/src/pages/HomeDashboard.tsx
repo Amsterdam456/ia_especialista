@@ -83,6 +83,9 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
           </p>
           <div className="hero-actions">
             <GlassButton onClick={handleNewChat}>Nova conversa</GlassButton>
+            <GlassButton variant="ghost" onClick={() => navigate("/profile")}>
+              Meu perfil
+            </GlassButton>
             <GlassButton variant="ghost" onClick={onLogout}>
               Sair
             </GlassButton>

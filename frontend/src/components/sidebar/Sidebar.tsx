@@ -8,6 +8,8 @@ type Props = {
   onSelectChat: (id: number) => void;
   onNewChat: () => void;
   onLogout: () => void;
+  onRenameChat?: (id: number, title: string) => void;
+  onDeleteChat?: (id: number) => void;
   adminUsersCount: number;
   policiesCount: number;
   showChats?: boolean;
@@ -21,6 +23,8 @@ export function Sidebar({
   onSelectChat,
   onNewChat,
   onLogout,
+  onRenameChat,
+  onDeleteChat,
   adminUsersCount,
   policiesCount,
   showChats = true,
@@ -40,9 +44,9 @@ export function Sidebar({
       </div>
 
       {showChats ? (
-        <GlassButton onClick={onNewChat} className="w-full">
+        <button className="chat-pill w-full" onClick={onNewChat}>
           + Novo chat
-        </GlassButton>
+        </button>
       ) : null}
 
       {showChats ? (
@@ -50,14 +54,31 @@ export function Sidebar({
           <p className="overline">Conversas</p>
           <div className="sidebar-chats">
             {chats.map((chat) => (
-              <button
-                key={chat.id}
-                className={`chat-pill ${selectedChatId === chat.id ? "active" : ""}`}
-                onClick={() => onSelectChat(chat.id)}
-              >
-                <span>{chat.title}</span>
-                <span className="pill-date">{new Date(chat.created_at).toLocaleDateString()}</span>
-              </button>
+              <div className="chat-row" key={chat.id}>
+                <button
+                  className={`chat-pill ${selectedChatId === chat.id ? "active" : ""}`}
+                  onClick={() => onSelectChat(chat.id)}
+                >
+                  <span>{chat.title}</span>
+                  <span className="pill-date">{new Date(chat.created_at).toLocaleDateString()}</span>
+                </button>
+                <div className="chat-actions">
+                  <button
+                    className="glass-button compact"
+                    onClick={() => onRenameChat?.(chat.id, chat.title)}
+                    title="Renomear"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="glass-button compact danger"
+                    onClick={() => onDeleteChat?.(chat.id)}
+                    title="Excluir"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
             ))}
             {chats.length === 0 && <div className="muted">Nenhum chat ainda.</div>}
           </div>
@@ -77,7 +98,7 @@ export function Sidebar({
         </div>
       ) : null}
 
-      <GlassButton variant="ghost" onClick={onLogout} className="w-full">
+      <GlassButton className="w-full" variant="ghost" onClick={onLogout}>
         Sair
       </GlassButton>
     </aside>

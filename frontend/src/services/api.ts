@@ -1,5 +1,4 @@
 import type {
-  AskResponse,
   Chat,
   ChatCompletionData,
   Envelope,
@@ -96,6 +95,17 @@ export async function getMe(token: string) {
   return request<User>("/auth/me", undefined, token);
 }
 
+export async function changePassword(token: string, old_password: string | null, new_password: string) {
+  return request<boolean>(
+    "/auth/change-password",
+    {
+      method: "POST",
+      body: JSON.stringify({ old_password, new_password }),
+    },
+    token
+  );
+}
+
 // =====================
 // 💬 CHATS
 // =====================
@@ -130,6 +140,14 @@ export async function ask(token: string, chatId: number, question: string) {
   );
 }
 
+export async function renameChat(token: string, chatId: number, title: string) {
+  return request<Chat>(`/chats/${chatId}`, { method: "PUT", body: JSON.stringify({ title }) }, token);
+}
+
+export async function deleteChat(token: string, chatId: number) {
+  return request<boolean>(`/chats/${chatId}`, { method: "DELETE" }, token);
+}
+
 // =====================
 // 🔧 ADMIN
 // =====================
@@ -145,14 +163,3 @@ export async function getPolicies(token: string) {
 // =====================
 // 🤖 ATHENA
 // =====================
-
-export async function askAthena(token: string, question: string) {
-  return request<AskResponse>(
-    "/ask",
-    {
-      method: "POST",
-      body: JSON.stringify({ question }),
-    },
-    token
-  );
-}

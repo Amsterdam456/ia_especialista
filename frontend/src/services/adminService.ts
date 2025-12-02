@@ -15,6 +15,13 @@ export const adminService = {
   async updateUser(id: number, data: Partial<User> & { role?: string }, token?: string) {
     return request<User>(`/admin/users/${id}`, { method: "PUT", body: JSON.stringify(data), headers: authHeaders(token) }, token);
   },
+  async resetPassword(id: number, newPassword: string, token?: string) {
+    return request<User>(
+      `/admin/users/${id}`,
+      { method: "PUT", body: JSON.stringify({ password: newPassword }), headers: authHeaders(token) },
+      token
+    );
+  },
   async deleteUser(id: number, token?: string) {
     return request<boolean>(`/admin/users/${id}`, { method: "DELETE", headers: authHeaders(token) }, token);
   },
@@ -66,5 +73,19 @@ export const adminService = {
   },
   async sendFeedbackResponse(data: any, token?: string) {
     return request<ChatCompletionData>("/admin/feedback/respond", { method: "POST", body: JSON.stringify(data), headers: authHeaders(token) }, token);
+  },
+  async uploadUsersBulk(file: File, token?: string) {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_URL}/admin/users/bulk`, {
+      method: "POST",
+      headers: authHeaders(token),
+      body: form,
+    });
+    const payload = (await res.json()) as Envelope<{ created: number; errors: string[] }>;
+    if (!res.ok || !payload.success) {
+      throw new Error(payload.error || "Erro ao criar usuários em lote");
+    }
+    return payload.data;
   },
 };
