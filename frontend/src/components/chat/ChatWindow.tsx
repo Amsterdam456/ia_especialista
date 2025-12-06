@@ -18,9 +18,6 @@ export function ChatWindow({ messages, question, setQuestion, onSend, loading }:
           <p className="overline">ATHENA CHAT</p>
           <h3>Converse com a IA especialista</h3>
         </div>
-        <GlassButton variant="ghost" onClick={onSend} disabled={loading || !question.trim()}>
-          {loading ? "Gerando..." : "Enviar"}
-        </GlassButton>
       </header>
 
       <div className="chat-body">
@@ -38,7 +35,11 @@ export function ChatWindow({ messages, question, setQuestion, onSend, loading }:
                   {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
-              <p>{msg.content}</p>
+              <div className="chat-content">
+                {msg.content.split("\n").map((line, idx) => (
+                  <p key={idx}>{line}</p>
+                ))}
+              </div>
             </div>
           ))
         )}

@@ -88,4 +88,11 @@ export const adminService = {
     }
     return payload.data;
   },
+  async getPivot(token?: string, params?: { cenario?: string; ano?: string }) {
+    const search = new URLSearchParams();
+    if (params?.cenario) search.append("cenario", params.cenario);
+    if (params?.ano) search.append("ano", params.ano);
+    const qs = search.toString() ? `?${search.toString()}` : "";
+    return request<any[]>(`/admin/finance/pivot${qs}`, { headers: authHeaders(token) }, token);
+  },
 };

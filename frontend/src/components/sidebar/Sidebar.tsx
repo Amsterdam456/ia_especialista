@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { GlassButton } from "../buttons/GlassButton";
 import type { Chat, User } from "../../types";
 
@@ -25,12 +26,12 @@ export function Sidebar({
   onLogout,
   onRenameChat,
   onDeleteChat,
-  adminUsersCount,
-  policiesCount,
   showChats = true,
   showMetrics = true,
 }: Props) {
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const badge = user.role || (user.is_admin ? "Admin" : "User");
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -65,18 +66,17 @@ export function Sidebar({
                 <div className="chat-actions">
                   <button
                     className="glass-button compact"
-                    onClick={() => onRenameChat?.(chat.id, chat.title)}
-                    title="Renomear"
+                    onClick={() => setOpenMenuId(openMenuId === chat.id ? null : chat.id)}
+                    title="Opções"
                   >
-                    ✏️
+                    ⋯
                   </button>
-                  <button
-                    className="glass-button compact danger"
-                    onClick={() => onDeleteChat?.(chat.id)}
-                    title="Excluir"
-                  >
-                    🗑️
-                  </button>
+                  {openMenuId === chat.id && (
+                    <div className="chat-menu">
+                      <button onClick={() => { setOpenMenuId(null); onRenameChat?.(chat.id, chat.title); }}>Renomear</button>
+                      <button className="danger" onClick={() => { setOpenMenuId(null); onDeleteChat?.(chat.id); }}>Excluir</button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -85,18 +85,7 @@ export function Sidebar({
         </div>
       ) : null}
 
-      {showMetrics && (user.is_admin || user.role === "admin") ? (
-        <div className="sidebar-metrics">
-          <div className="metric">
-            <div className="metric-label">Usuários</div>
-            <div className="metric-value">{adminUsersCount}</div>
-          </div>
-          <div className="metric">
-            <div className="metric-label">Políticas</div>
-            <div className="metric-value">{policiesCount}</div>
-          </div>
-        </div>
-      ) : null}
+      {/* Métricas removidas para um visual mais clean */}
 
       <GlassButton className="w-full" variant="ghost" onClick={onLogout}>
         Sair

@@ -6,6 +6,7 @@ import HomeDashboard from "./pages/HomeDashboard";
 import AthenaIaChatPage from "./pages/AthenaIaChatPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProfilePage from "./pages/ProfilePage";
+import PivotPage from "./pages/PivotPage";
 import { getMe } from "./services/api";
 import type { User } from "./types";
 
@@ -201,6 +202,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ProfileWrapper />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/pivot"
+            element={
+              <ProtectedRoute>
+                <PivotPage />
               </ProtectedRoute>
             }
           />

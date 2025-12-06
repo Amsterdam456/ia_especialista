@@ -18,11 +18,11 @@ type Props = {
 };
 
 const highlights = [
-  { title: "ATHENA IA", description: "Assistente especialista treinada com dados internos para responder e apoiar decisões.", tag: "IA Especialista", icon: "🤖" },
-  { title: "Neural Map", description: "Mapa inteligente que cruza mercado, captação e evasão para revelar oportunidades.", tag: "Mapa Estratégico", icon: "🧭" },
+  { title: "ATHENA IA", description: "Assistente especialista treinada com dados internos para responder e apoiar decisões.", tag: "IA Especialista", icon: "✨" },
+  { title: "Neural Map", description: "Mapa inteligente que cruza mercado, captação e evasão para revelar oportunidades.", tag: "Mapa Estratégico", icon: "🧠" },
   { title: "Athena OPS", description: "Digital twin operacional: simula cenários e impactos em ROL.", tag: "Digital Twin", icon: "🛰️" },
-  { title: "Athena DNA", description: "Sistema de riscos com score por núcleo para sinais precoces.", tag: "Gestão de Riscos", icon: "🧬" },
-  { title: "Forecast 360", description: "Previsões financeiras, comerciais e acadêmicas em um único painel.", tag: "Previsão", icon: "📈" },
+  { title: "Athena DNA", description: "Sistema de riscos com score por núcleo para sinais precoces.", tag: "Gestão de Riscos", icon: "🛡️" },
+  { title: "Pivot", description: "Visões financeiras consolidadas para IA e painel pivot.", tag: "Financeiro", icon: "📊" },
   { title: "Athena Oracle", description: "Gera planos e responde perguntas complexas com contexto interno.", tag: "Planejamento", icon: "🔮" },
 ];
 
@@ -100,7 +100,7 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
           description="Converse com a IA oficial e obtenha respostas baseadas nas políticas Estácio."
           primary
           onClick={() => onOpenChat("/chat")}
-          icon="🤖"
+          icon="✨"
         />
         {(user.is_admin || user.role === "admin") && (
           <HomeActionCard
@@ -119,7 +119,8 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
             subtitle={item.tag}
             description={item.description}
             icon={item.icon}
-            disabled
+            disabled={item.title !== "Pivot"}
+            onClick={item.title === "Pivot" ? () => navigate("/pivot") : undefined}
           />
         ))}
       </section>

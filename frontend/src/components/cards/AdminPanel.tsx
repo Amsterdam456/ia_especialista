@@ -14,7 +14,7 @@ type Policy = {
 type Props = {
   currentUser: User;
   users: User[];
-  policies: Policy[]; // <-- corrigido
+  policies: Policy[];
 };
 
 export function AdminPanel({ currentUser, users, policies }: Props) {

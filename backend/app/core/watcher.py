@@ -6,6 +6,7 @@ from pathlib import Path
 
 from app.core.config import settings
 from app.services.ingest import ingest_all_policies, POLICY_DIR
+from app.services.finance_ingest import ingest_finance_csv
 
 HASH_FILE = POLICY_DIR / ".last_hash"
 CHECK_INTERVAL_SECONDS = settings.CHECK_INTERVAL_SECONDS
@@ -55,8 +56,10 @@ def save_last_hash(value: str | None):
 
 
 def start_policy_watcher():
-    """Run an infinite loop that reprocesses policies when files change."""
-    print("[watcher] ATHENA watcher iniciado (checagem 1x/dia)")
+    """Run an infinite loop that reprocesses policies and ingere CSV financeiro diariamente."""
+    print("[watcher] ATHENA watcher iniciado (checagem a cada ciclo configurado)")
+
+    last_finance_run = 0.0
 
     while True:
         print(f"\n[{datetime.now()}] Rodando checagem diaria...")
@@ -72,5 +75,12 @@ def start_policy_watcher():
             save_last_hash(current_hash)
 
             print("[watcher] IA atualizada com sucesso!")
+
+        # Ingestão financeira periódica
+        now_ts = time.time()
+        if now_ts - last_finance_run >= settings.FINANCE_REFRESH_SECONDS:
+            print("[watcher] Iniciando ingestão financeira via CSV...")
+            ingest_finance_csv()
+            last_finance_run = now_ts
 
         time.sleep(CHECK_INTERVAL_SECONDS)

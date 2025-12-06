@@ -8,12 +8,14 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "ATHENA"
 
     EMBEDDINGS_FILE: str = "data/embeddings.pkl"
-    POLICY_DIR: str = "policies"
+    POLICY_DIR: str = "storage/policies"
 
     LMSTUDIO_API_URL: str = "http://127.0.0.1:1234/v1/responses"
     LMSTUDIO_MODEL: str = "qwen2.5-7b-instruct-1m"
 
-    CHECK_INTERVAL_SECONDS: int = 30
+    CHECK_INTERVAL_SECONDS: int = 86400  # 24h para watcher
+    FINANCE_CSV_PATH: str = "data/finance.csv"
+    FINANCE_REFRESH_SECONDS: int = 86400
 
     SECRET_KEY: str = Field("change-me", min_length=8)
     ALGORITHM: str = "HS256"
@@ -21,8 +23,8 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "sqlite:///./data/athena.db"
 
-    ADMIN_EMAIL: str = "admin@athena.local"
-    ADMIN_PASSWORD: str = "admin123"
+    ADMIN_EMAIL: str = "admin@athena.com"
+    ADMIN_PASSWORD: str = "123"
 
     class Config:
         env_file = ".env"

@@ -12,8 +12,8 @@ type Props = {
 
 export default function LoginPage({ onLoginSuccess }: Props) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@athena.local");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("admin@athena.com");
+  const [password, setPassword] = useState("123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,9 +50,9 @@ export default function LoginPage({ onLoginSuccess }: Props) {
           <label>Senha</label>
           <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
 
-          <button className="chat-pill" type="submit" disabled={loading}>
+          <GlassButton type="submit" disabled={loading}>
             {loading ? "Entrando..." : "Entrar"}
-          </button>
+          </GlassButton>
         </form>
 
         {error && <div className="alert">{error}</div>}

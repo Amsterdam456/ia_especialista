@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_admin, get_password_hash
+from app.core.security import get_current_admin, get_current_user, get_password_hash
 from app.db.session import get_session
 from app.models import (
     ActionAudit,
@@ -29,6 +29,7 @@ from app.schemas.admin import (
     UserAdminUpdate,
 )
 from app.services.ingest import POLICY_DIR, ingest_all_policies
+from app.services.finance_ingest import ingest_finance_csv, load_pivot_cache
 
 router = APIRouter(prefix="/admin")
 
@@ -257,3 +258,33 @@ def download_users_template(_: User = Depends(get_current_admin)):
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=template_usuarios.csv"},
     )
+
+
+@router.post("/finance/import", response_model=Envelope[bool])
+def import_finance(_: User = Depends(get_current_admin)):
+    ok = ingest_finance_csv()
+    if not ok:
+        return Envelope(success=False, data=False, error="CSV financeiro não encontrado ou vazio")
+    return Envelope(success=True, data=True)
+
+
+@router.get("/finance/pivot", response_model=Envelope[dict])
+def get_pivot_data(
+    cenario: str | None = None,
+    ano: str | None = None,
+    _: User = Depends(get_current_user),
+):
+    payload = load_pivot_cache() or {}
+    raw = payload.get("raw", [])
+    aggregates = payload.get("aggregates", [])
+    dre = payload.get("dre", [])
+
+    # filtros opcionais (aplicados nos agregados)
+    if cenario:
+        aggregates = [d for d in aggregates if str(d.get("base", "")).lower() == cenario.lower()]
+        dre = [d for d in dre if str(d.get("base", "")).lower() == cenario.lower()]
+    if ano:
+        aggregates = [d for d in aggregates if str(d.get("ano", "")).lower() == ano.lower()]
+        dre = [d for d in dre if str(d.get("ano", "")).lower() == ano.lower()]
+
+    return Envelope(success=True, data={"raw": raw, "aggregates": aggregates, "dre": dre})
