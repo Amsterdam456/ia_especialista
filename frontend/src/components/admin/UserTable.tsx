@@ -10,9 +10,15 @@ type Props = {
   refreshKey?: number;
 };
 
+type BulkResult = {
+  created: number;
+  errors: string[];
+  temp_passwords?: { email: string; password: string }[];
+};
+
 export function UserTable({ token, onCreate, refreshKey = 0 }: Props) {
   const [users, setUsers] = useState<User[]>([]);
-  const [bulkResult, setBulkResult] = useState<{ created: number; errors: string[] } | null>(null);
+  const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
   const [bulkFile, setBulkFile] = useState<File | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -58,23 +64,36 @@ export function UserTable({ token, onCreate, refreshKey = 0 }: Props) {
     }
   };
 
+  const toggleActive = async (user: User) => {
+    try {
+      setLoadingAction(true);
+      await adminService.updateUser(user.id, { is_active: !user.is_active }, token);
+      load();
+    } catch (err) {
+      console.error(err);
+      setToast("Erro ao atualizar status.");
+    } finally {
+      setLoadingAction(false);
+      setTimeout(() => setToast(null), 3500);
+    }
+  };
+
   return (
     <div className="card-glass">
-      <div className="card-title">Usuários</div>
+      <div className="card-title">Usuarios</div>
       <GlassButton
-        className="mb-2"
         onClick={() => {
           setEditingUser(null);
           setShowModal(true);
           onCreate();
         }}
       >
-        + Novo usuário
+        + Novo usuario
       </GlassButton>
       <div className="upload-area">
-        <input type="file" accept=".csv,.xlsx" onChange={(e) => setBulkFile(e.target.files?.[0] || null)} />
+        <input type="file" accept=".csv" onChange={(e) => setBulkFile(e.target.files?.[0] || null)} />
         <GlassButton variant="ghost" onClick={uploadBulk} disabled={!bulkFile}>
-          Criar usuários em lote
+          Criar usuarios em lote
         </GlassButton>
         <a
           href={`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/api/v1/admin/users/template`}
@@ -87,9 +106,20 @@ export function UserTable({ token, onCreate, refreshKey = 0 }: Props) {
       </div>
       {bulkResult && (
         <div className="muted">
-          Criados: {bulkResult.created} {bulkResult.errors.length ? ` | Erros: ${bulkResult.errors.join(", ")}` : ""}
+          Criados: {bulkResult.created}
+          {bulkResult.errors.length ? ` | Erros: ${bulkResult.errors.join(", ")}` : ""}
+          {bulkResult.temp_passwords?.length ? " | Senhas temporarias geradas." : ""}
         </div>
       )}
+      {bulkResult?.temp_passwords?.length ? (
+        <div className="muted">
+          {bulkResult.temp_passwords.map((item) => (
+            <div key={item.email}>
+              {item.email}: {item.password}
+            </div>
+          ))}
+        </div>
+      ) : null}
       <table className="admin-table">
         <thead>
           <tr>
@@ -97,7 +127,7 @@ export function UserTable({ token, onCreate, refreshKey = 0 }: Props) {
             <th>Email</th>
             <th>Cargo</th>
             <th>Status</th>
-            <th>Ações</th>
+            <th>Acoes</th>
           </tr>
         </thead>
         <tbody>
@@ -106,7 +136,7 @@ export function UserTable({ token, onCreate, refreshKey = 0 }: Props) {
               <td>{u.full_name || "-"}</td>
               <td>{u.email}</td>
               <td>{u.role || (u.is_admin ? "admin" : "usuario")}</td>
-              <td>Ativo</td>
+              <td>{u.is_active ? "Ativo" : "Inativo"}</td>
               <td className="actions">
                 <GlassButton variant="ghost" onClick={() => handleEdit(u)}>
                   Editar
@@ -116,14 +146,22 @@ export function UserTable({ token, onCreate, refreshKey = 0 }: Props) {
                 </GlassButton>
                 <GlassButton
                   variant="ghost"
+                  onClick={() => toggleActive(u)}
+                >
+                  {u.is_active ? "Desativar" : "Ativar"}
+                </GlassButton>
+                <GlassButton
+                  variant="ghost"
                   onClick={async () => {
+                    const ok = window.confirm("Excluir usuario definitivamente?");
+                    if (!ok) return;
                     setLoadingAction(true);
                     await adminService.deleteUser(u.id, token);
                     setLoadingAction(false);
                     load();
                   }}
                 >
-                  Desativar
+                  Excluir
                 </GlassButton>
               </td>
             </tr>

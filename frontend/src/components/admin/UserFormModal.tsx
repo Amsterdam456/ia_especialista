@@ -8,20 +8,31 @@ type Props = {
   userToEdit?: { id: number; email: string; full_name?: string | null; role?: string; is_admin?: boolean };
 };
 
+const MIN_PASSWORD_LEN = 8;
+
 export function UserFormModal({ token, onClose, userToEdit }: Props) {
   const isEdit = Boolean(userToEdit);
   const [email, setEmail] = useState(userToEdit?.email ?? "");
   const [name, setName] = useState(userToEdit?.full_name ?? "");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState(userToEdit?.role || (userToEdit?.is_admin ? "admin" : "usuario") || "usuario");
+  const [active, setActive] = useState(userToEdit?.is_active ?? true);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async () => {
     try {
+      if (!isEdit && password.length < MIN_PASSWORD_LEN) {
+        setError(`Senha precisa ter no minimo ${MIN_PASSWORD_LEN} caracteres.`);
+        return;
+      }
+      if (isEdit && password && password.length < MIN_PASSWORD_LEN) {
+        setError(`Senha precisa ter no minimo ${MIN_PASSWORD_LEN} caracteres.`);
+        return;
+      }
       if (isEdit && userToEdit) {
         await adminService.updateUser(
           userToEdit.id,
-          { email, full_name: name, role, ...(password ? { password } : {}) },
+          { email, full_name: name, role, is_active: active, ...(password ? { password } : {}) },
           token
         );
       } else {
@@ -29,14 +40,14 @@ export function UserFormModal({ token, onClose, userToEdit }: Props) {
       }
       onClose(true);
     } catch (e: any) {
-      setError(e.message || "Erro ao salvar usuário");
+      setError(e.message || "Erro ao salvar usuario");
     }
   };
 
   return (
     <div className="modal">
       <div className="modal-content">
-        <h3>{isEdit ? "Editar usuário" : "Novo usuário"}</h3>
+        <h3>{isEdit ? "Editar usuario" : "Novo usuario"}</h3>
         <label>Nome</label>
         <input value={name} onChange={(e) => setName(e.target.value)} className="input-glass" />
         <label>Email</label>
@@ -53,8 +64,17 @@ export function UserFormModal({ token, onClose, userToEdit }: Props) {
         <select value={role} onChange={(e) => setRole(e.target.value)} className="input-glass">
           <option value="admin">Admin</option>
           <option value="moderador">Moderador</option>
-          <option value="usuario">Usuário</option>
+          <option value="usuario">Usuario</option>
         </select>
+        <label>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => setActive(e.target.checked)}
+            style={{ marginRight: "6px" }}
+          />
+          Usuario ativo
+        </label>
         {error && <p className="muted">{error}</p>}
         <div className="modal-actions">
           <GlassButton onClick={submit}>{isEdit ? "Salvar" : "Criar"}</GlassButton>

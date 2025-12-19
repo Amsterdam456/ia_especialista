@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import bg from "../assets/bg_athena.jpg";
 import { GlassButton } from "../components/buttons/GlassButton";
 import { HomeActionCard } from "../components/cards/HomeActionCard";
 import { InfoCard } from "../components/cards/InfoCard";
@@ -8,6 +7,7 @@ import { AdminPanel } from "../components/cards/AdminPanel";
 import { Shell } from "../components/layout/Shell";
 import { Sidebar } from "../components/sidebar/Sidebar";
 import { getAdminUsers, getPolicies, createChat } from "../services/api";
+import { adminService } from "../services/adminService";
 import type { User } from "../types";
 
 type Props = {
@@ -18,17 +18,17 @@ type Props = {
 };
 
 const highlights = [
-  { title: "ATHENA IA", description: "Assistente especialista treinada com dados internos para responder e apoiar decisões.", tag: "IA Especialista", icon: "✨" },
-  { title: "Neural Map", description: "Mapa inteligente que cruza mercado, captação e evasão para revelar oportunidades.", tag: "Mapa Estratégico", icon: "🧠" },
-  { title: "Athena OPS", description: "Digital twin operacional: simula cenários e impactos em ROL.", tag: "Digital Twin", icon: "🛰️" },
-  { title: "Athena DNA", description: "Sistema de riscos com score por núcleo para sinais precoces.", tag: "Gestão de Riscos", icon: "🛡️" },
-  { title: "Pivot", description: "Visões financeiras consolidadas para IA e painel pivot.", tag: "Financeiro", icon: "📊" },
-  { title: "Athena Oracle", description: "Gera planos e responde perguntas complexas com contexto interno.", tag: "Planejamento", icon: "🔮" },
+  { title: "ATHENA IA", description: "Assistente especialista treinada com dados internos para responder e apoiar decisoes.", tag: "IA Especialista", icon: "AI" },
+  { title: "Neural Map", description: "Mapa inteligente que cruza mercado, captacao e evasao para revelar oportunidades.", tag: "Mapa Estrategico", icon: "MAP" },
+  { title: "Athena OPS", description: "Digital twin operacional: simula cenarios e impactos em ROL.", tag: "Digital Twin", icon: "OPS" },
+  { title: "Athena DNA", description: "Sistema de riscos com score por nucleo para sinais precoces.", tag: "Gestao de Riscos", icon: "DNA" },
+  { title: "Pivot", description: "Visoes financeiras consolidadas para IA e painel pivot.", tag: "Financeiro", icon: "PVT" },
 ];
 
 export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Props) {
   const [adminUsers, setAdminUsers] = useState<User[]>([]);
-  const [policies, setPolicies] = useState<string[]>([]);
+  const [policies, setPolicies] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any | null>(null);
   const navigate = useNavigate();
 
   const handleNewChat = async () => {
@@ -44,9 +44,14 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
     const init = async () => {
       try {
         if (user.is_admin || user.role === "admin") {
-          const [users, pol] = await Promise.all([getAdminUsers(token), getPolicies(token)]);
+          const [users, pol, mtx] = await Promise.all([
+            getAdminUsers(token),
+            getPolicies(token),
+            adminService.getMetrics(token),
+          ]);
           setAdminUsers(users);
           setPolicies(pol as any);
+          setMetrics(mtx);
         }
       } catch (e) {
         console.error(e);
@@ -57,7 +62,6 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
 
   return (
     <Shell
-      background={bg}
       sidebar={
         <Sidebar
           user={user}
@@ -75,11 +79,11 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
     >
       <header className="hero">
         <div>
-          <p className="overline">ATHENA • IA Corporativa Estácio</p>
-          <h1>Inteligência aplicada a decisões reais</h1>
+          <p className="overline">ATHENA - IA Corporativa Estacio</p>
+          <h1>Inteligencia aplicada a decisoes reais</h1>
           <p className="subtitle">
-            Plataforma proprietária de IA, simulação e diagnóstico que conecta resultados financeiros,
-            captação, evasão e operação acadêmica.
+            Plataforma proprietaria de IA, simulacao e diagnostico que conecta resultados financeiros,
+            captacao, evasao e operacao academica.
           </p>
           <div className="hero-actions">
             <GlassButton onClick={handleNewChat}>Nova conversa</GlassButton>
@@ -97,19 +101,19 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
         <HomeActionCard
           title="IA Especialista"
           subtitle="ATHENA IA"
-          description="Converse com a IA oficial e obtenha respostas baseadas nas políticas Estácio."
+          description="Converse com a IA oficial e obtenha respostas baseadas nas politicas Estacio."
           primary
           onClick={() => onOpenChat("/chat")}
-          icon="✨"
+          icon="AI"
         />
         {(user.is_admin || user.role === "admin") && (
           <HomeActionCard
-            title="Administração do Sistema"
-            subtitle="Gerenciar usuários, políticas e configurações"
+            title="Administracao do Sistema"
+            subtitle="Gerenciar usuarios, politicas e configuracoes"
             description="Acesse o painel administrativo."
             primary
             onClick={() => navigate("/admin")}
-            icon="🛠️"
+            icon="ADM"
           />
         )}
         {highlights.map((item) => (
@@ -126,8 +130,15 @@ export default function HomeDashboard({ user, token, onLogout, onOpenChat }: Pro
       </section>
 
       <section className="info-panels">
-        <InfoCard title="Políticas carregadas" description={`Total: ${policies.length || 0}`} tag="Políticas" />
-        <InfoCard title="Status do modelo" description="Modelo atual: LM Studio" tag="Conexão: OK" />
+        <InfoCard title="Politicas carregadas" description={`Total: ${policies.length || 0}`} tag="Politicas" />
+        <InfoCard title="Status do modelo" description="Modelo atual: LM Studio" tag="Conexao: OK" />
+        {metrics && (
+          <InfoCard
+            title="Indicadores"
+            description={`Usuarios: ${metrics.users} | Chats: ${metrics.chats} | Mensagens: ${metrics.messages}`}
+            tag={`Pendencias: ${metrics.directives_pending || 0}`}
+          />
+        )}
       </section>
 
       {(user.is_admin || user.role === "admin") && <AdminPanel currentUser={user} users={adminUsers} policies={policies} />}

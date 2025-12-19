@@ -23,7 +23,7 @@ const jsonHeaders = (token?: string) => ({
   ...(token ? { Authorization: `Bearer ${token}` } : {}),
 });
 
-// 🔧 Função genérica para endpoints que seguem o Envelope
+// Funcao generica para endpoints que seguem o Envelope
 export async function request<T>(
   path: string,
   options?: RequestInit,
@@ -40,17 +40,17 @@ export async function request<T>(
   const payload = (await res.json()) as Envelope<T>;
 
   if (!res.ok || !payload.success) {
-    throw new Error(payload.error || "Erro de requisição");
+    throw new Error(payload.error || "Erro de requisicao");
   }
 
   return payload.data;
 }
 
 // =====================
-// 🔐 AUTH
+// AUTH
 // =====================
 
-// ⚠️ LOGIN NÃO USA Envelope! Backend retorna { access_token, user }
+// LOGIN NAO USA Envelope! Backend retorna { access_token, user }
 export async function login(email: string, password: string) {
   const res = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
@@ -107,7 +107,7 @@ export async function changePassword(token: string, old_password: string | null,
 }
 
 // =====================
-// 💬 CHATS
+// CHATS
 // =====================
 
 export async function getChats(token: string) {
@@ -140,6 +140,25 @@ export async function ask(token: string, chatId: number, question: string) {
   );
 }
 
+export async function askStream(token: string, chatId: number, question: string) {
+  return fetch(`${API_URL}/chats/${chatId}/ask/stream`, {
+    method: "POST",
+    headers: jsonHeaders(token),
+    body: JSON.stringify({ question }),
+  });
+}
+
+export async function sendFeedback(token: string, chatId: number, messageId: number, rating: number, comment?: string) {
+  return request<boolean>(
+    `/chats/${chatId}/feedback`,
+    {
+      method: "POST",
+      body: JSON.stringify({ message_id: messageId, rating, comment }),
+    },
+    token
+  );
+}
+
 export async function renameChat(token: string, chatId: number, title: string) {
   return request<Chat>(`/chats/${chatId}`, { method: "PUT", body: JSON.stringify({ title }) }, token);
 }
@@ -149,7 +168,7 @@ export async function deleteChat(token: string, chatId: number) {
 }
 
 // =====================
-// 🔧 ADMIN
+// ADMIN
 // =====================
 
 export async function getAdminUsers(token: string) {
@@ -157,9 +176,9 @@ export async function getAdminUsers(token: string) {
 }
 
 export async function getPolicies(token: string) {
-  return request<string[]>("/admin/policies", undefined, token);
+  return request<any[]>("/admin/policies", undefined, token);
 }
 
 // =====================
-// 🤖 ATHENA
+// ATHENA
 // =====================

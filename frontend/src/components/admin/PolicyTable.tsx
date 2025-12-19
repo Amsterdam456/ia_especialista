@@ -45,11 +45,11 @@ export function PolicyTable({ token }: Props) {
 
   return (
     <div className="card-glass">
-      <div className="card-title">Políticas</div>
+      <div className="card-title">Politicas</div>
       <div className="upload-area">
-        <input type="file" accept="application/pdf" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-        <GlassButton onClick={upload} disabled={!file || loading}>Enviar política</GlassButton>
-        <GlassButton variant="ghost" onClick={process} disabled={loading}>Processar políticas</GlassButton>
+        <input type="file" accept=".pdf,.docx,.txt" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+        <GlassButton onClick={upload} disabled={!file || loading}>Enviar politica</GlassButton>
+        <GlassButton variant="ghost" onClick={process} disabled={loading}>Processar politicas</GlassButton>
       </div>
       <table className="admin-table">
         <thead>
@@ -58,7 +58,7 @@ export function PolicyTable({ token }: Props) {
             <th>Nome</th>
             <th>Upload</th>
             <th>Status</th>
-            <th>Ações</th>
+            <th>Acoes</th>
           </tr>
         </thead>
         <tbody>
@@ -79,7 +79,7 @@ export function PolicyTable({ token }: Props) {
           ))}
           {policies.length === 0 && (
             <tr>
-              <td colSpan={5}>Nenhuma política</td>
+              <td colSpan={5}>Nenhuma politica</td>
             </tr>
           )}
         </tbody>

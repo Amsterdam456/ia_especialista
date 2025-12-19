@@ -14,6 +14,7 @@ export type User = {
   email: string;
   full_name?: string | null;
   is_admin: boolean;
+  is_active?: boolean;
   created_at: string;
   role?: "admin" | "moderador" | "usuario";
 };

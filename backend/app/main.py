@@ -2,12 +2,16 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import threading
+import time
+
 from app.core.config import settings
 from app.db.database import Base, engine
 from app.db.init_db import init_db
 from app import models  # noqa: F401 ensures models are registered
 from app.routes import admin, auth, chats, athena
 from app.services.ingest import ingest_all_policies
+from app.core.watcher import start_policy_watcher
 
 
 def create_app() -> FastAPI:
@@ -17,13 +21,28 @@ def create_app() -> FastAPI:
     )
 
     # CORS
+    allowed_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()] or ["*"]
+    allow_credentials = "*" not in allowed_origins
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
+        allow_origins=allowed_origins,
+        allow_credentials=allow_credentials,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        start = time.perf_counter()
+        response = await call_next(request)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        response.headers.setdefault("X-Response-Time", f"{elapsed_ms:.0f}ms")
+        if elapsed_ms > 1500:
+            print(f"[slow] {request.method} {request.url.path} {elapsed_ms:.0f}ms")
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        return response
 
     # HTTP error handler
     @app.exception_handler(HTTPException)
@@ -49,6 +68,8 @@ def create_app() -> FastAPI:
     def _startup():
         init_db()
         ingest_all_policies()
+        # Start watcher in background thread to reprocess policies/finance periodically
+        threading.Thread(target=start_policy_watcher, daemon=True).start()
 
     # Routers
     api_prefix = settings.API_V1_PREFIX

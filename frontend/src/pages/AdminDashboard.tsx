@@ -55,13 +55,13 @@ export default function AdminDashboard({ user, token, onBack, onLogout }: Props)
           </div>
           <div className="sidebar-list">
             <button className={`chat-pill ${section === "users" ? "active" : ""}`} onClick={() => go("/admin/users", "users")}>
-              Usuários
+              Usuarios
             </button>
             <button className={`chat-pill ${section === "policies" ? "active" : ""}`} onClick={() => go("/admin/policies", "policies")}>
-              Políticas
+              Politicas
             </button>
             <button className={`chat-pill ${section === "config" ? "active" : ""}`} onClick={() => go("/admin/config", "config")}>
-              Configurações
+              Configuracoes
             </button>
             <button className={`chat-pill ${section === "audit" ? "active" : ""}`} onClick={() => go("/admin/audit", "audit")}>
               Auditoria
@@ -78,9 +78,9 @@ export default function AdminDashboard({ user, token, onBack, onLogout }: Props)
       {section === "users" && (
         <>
           <HomeActionCard
-            title="Usuários"
-            subtitle="Gerencie contas e papéis"
-            description="Criar, editar, desativar usuários."
+            title="Usuarios"
+            subtitle="Gerencie contas e papeis"
+            description="Criar, editar e desativar usuarios."
             primary
             onClick={() => setShowUserModal(true)}
           />

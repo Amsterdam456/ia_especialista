@@ -1,7 +1,7 @@
-from app.services.finance_ingest import ingest_finance_csv
-
-
-if __name__ == "__main__":
-    print("Iniciando ingestão da pivot (com progresso a cada 10k linhas)...")
-    ok = ingest_finance_csv(verbose=True)
-    print("Ingestão finalizada:", ok)
+import sqlite3
+con = sqlite3.connect("data/athena.db")
+cur = con.cursor()
+cur.execute("DELETE FROM alembic_version")
+con.commit()
+con.close()
+print("alembic_version limpo")

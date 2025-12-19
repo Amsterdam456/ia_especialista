@@ -16,3 +16,9 @@ class MessageOut(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class MessageFeedbackIn(BaseModel):
+    message_id: int
+    rating: int
+    comment: str | None = None

@@ -21,6 +21,7 @@ class UserLogin(BaseModel):
 class UserOut(UserBase):
     id: int
     is_admin: bool = False
+    is_active: bool = True
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

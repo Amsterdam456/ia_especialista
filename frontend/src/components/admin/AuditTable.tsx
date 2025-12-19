@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { adminService } from "../../services/adminService";
+import { GlassButton } from "../buttons/GlassButton";
 
 type Props = {
   token: string;
@@ -15,6 +16,19 @@ export function AuditTable({ token }: Props) {
   return (
     <div className="card-glass">
       <div className="card-title">Auditoria</div>
+      <GlassButton
+        variant="ghost"
+        onClick={async () => {
+          try {
+            await adminService.exportAuditCsv(token);
+          } catch (err) {
+            console.error(err);
+            alert("Falha ao exportar CSV");
+          }
+        }}
+      >
+        Exportar CSV
+      </GlassButton>
       <table className="admin-table">
         <thead>
           <tr>

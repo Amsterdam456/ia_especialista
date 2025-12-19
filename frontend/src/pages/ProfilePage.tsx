@@ -11,6 +11,8 @@ type Props = {
   onLogout: () => void;
 };
 
+const MIN_PASSWORD_LEN = 8;
+
 export default function ProfilePage({ user, token, onBack, onLogout }: Props) {
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
@@ -19,8 +21,12 @@ export default function ProfilePage({ user, token, onBack, onLogout }: Props) {
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
+    if (newPass.length < MIN_PASSWORD_LEN) {
+      setStatus(`Senha precisa ter no minimo ${MIN_PASSWORD_LEN} caracteres.`);
+      return;
+    }
     if (newPass !== confirm) {
-      setStatus("As senhas não conferem.");
+      setStatus("As senhas nao conferem.");
       return;
     }
     setSaving(true);
@@ -49,7 +55,7 @@ export default function ProfilePage({ user, token, onBack, onLogout }: Props) {
             <input className="input-glass" value={user.full_name || ""} disabled />
           </div>
           <div>
-            <label>Função</label>
+            <label>Funcao</label>
             <input className="input-glass" value={user.role || (user.is_admin ? "admin" : "usuario")} disabled />
           </div>
         </div>
@@ -61,6 +67,7 @@ export default function ProfilePage({ user, token, onBack, onLogout }: Props) {
         <input className="input-glass" type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} />
         <label>Confirmar nova senha</label>
         <input className="input-glass" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+        <p className="muted">Use ao menos {MIN_PASSWORD_LEN} caracteres.</p>
         {status && <p className="muted">{status}</p>}
         <div className="modal-actions">
           <GlassButton onClick={handleSave} disabled={saving}>

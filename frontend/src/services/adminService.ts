@@ -12,7 +12,7 @@ export const adminService = {
   async createUser(data: { email: string; full_name?: string; password: string; role: string }, token?: string) {
     return request<User>("/admin/users", { method: "POST", body: JSON.stringify(data), headers: authHeaders(token) }, token);
   },
-  async updateUser(id: number, data: Partial<User> & { role?: string }, token?: string) {
+  async updateUser(id: number, data: Partial<User> & { role?: string; password?: string }, token?: string) {
     return request<User>(`/admin/users/${id}`, { method: "PUT", body: JSON.stringify(data), headers: authHeaders(token) }, token);
   },
   async resetPassword(id: number, newPassword: string, token?: string) {
@@ -38,7 +38,7 @@ export const adminService = {
     });
     const payload = await res.json();
     if (!res.ok || !payload.success) {
-      throw new Error(payload.error || "Erro ao enviar política");
+      throw new Error(payload.error || "Erro ao enviar politica");
     }
     return payload.data;
   },
@@ -55,7 +55,7 @@ export const adminService = {
     });
     const payload = (await res.json()) as Envelope<boolean>;
     if (!res.ok || !payload.success) {
-      throw new Error(payload.error || "Erro ao processar políticas");
+      throw new Error(payload.error || "Erro ao processar politicas");
     }
     return payload.data;
   },
@@ -68,11 +68,44 @@ export const adminService = {
   async getAuditLogs(token?: string) {
     return request<any[]>("/admin/audit", { headers: authHeaders(token) }, token);
   },
+  async getMetrics(token?: string) {
+    return request<any>("/admin/metrics", { headers: authHeaders(token) }, token);
+  },
+  async exportAuditCsv(token?: string) {
+    const res = await fetch(`${API_URL}/admin/audit/export`, { headers: authHeaders(token) });
+    if (!res.ok) {
+      throw new Error("Erro ao exportar auditoria");
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "audit.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  },
   async getFeedback(token?: string) {
     return request<any[]>("/admin/feedback", { headers: authHeaders(token) }, token);
   },
+  async getFeedbackDirectives(token?: string) {
+    return request<any[]>("/admin/feedback/directives", { headers: authHeaders(token) }, token);
+  },
   async sendFeedbackResponse(data: any, token?: string) {
     return request<ChatCompletionData>("/admin/feedback/respond", { method: "POST", body: JSON.stringify(data), headers: authHeaders(token) }, token);
+  },
+  async approveFeedbackDirective(id: number, data: { text?: string }, token?: string) {
+    return request<boolean>(
+      `/admin/feedback/directives/${id}/approve`,
+      { method: "POST", body: JSON.stringify(data), headers: authHeaders(token) },
+      token
+    );
+  },
+  async rejectFeedbackDirective(id: number, token?: string) {
+    return request<boolean>(
+      `/admin/feedback/directives/${id}/reject`,
+      { method: "POST", headers: authHeaders(token) },
+      token
+    );
   },
   async uploadUsersBulk(file: File, token?: string) {
     const form = new FormData();
@@ -82,9 +115,9 @@ export const adminService = {
       headers: authHeaders(token),
       body: form,
     });
-    const payload = (await res.json()) as Envelope<{ created: number; errors: string[] }>;
+    const payload = (await res.json()) as Envelope<{ created: number; errors: string[]; temp_passwords?: { email: string; password: string }[] }>;
     if (!res.ok || !payload.success) {
-      throw new Error(payload.error || "Erro ao criar usuários em lote");
+      throw new Error(payload.error || "Erro ao criar usuarios em lote");
     }
     return payload.data;
   },
@@ -93,6 +126,20 @@ export const adminService = {
     if (params?.cenario) search.append("cenario", params.cenario);
     if (params?.ano) search.append("ano", params.ano);
     const qs = search.toString() ? `?${search.toString()}` : "";
-    return request<any[]>(`/admin/finance/pivot${qs}`, { headers: authHeaders(token) }, token);
+    return request<any>(`/admin/finance/pivot${qs}`, { headers: authHeaders(token) }, token);
+  },
+  async uploadFinanceCsv(file: File, token?: string) {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_URL}/admin/finance/upload`, {
+      method: "POST",
+      headers: authHeaders(token),
+      body: form,
+    });
+    const payload = (await res.json()) as Envelope<boolean>;
+    if (!res.ok || !payload.success) {
+      throw new Error(payload.error || "Erro ao enviar CSV financeiro");
+    }
+    return payload.data;
   },
 };

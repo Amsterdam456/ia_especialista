@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.db.session import get_session
 from app.models import User
 
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt", "pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login")
 
 
@@ -26,6 +26,29 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+
+
+def normalize_email(email: str) -> str:
+    return email.strip().lower()
+
+
+def validate_password(password: str, email: str | None = None) -> None:
+    if len(password) < settings.PASSWORD_MIN_LENGTH:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Senha deve ter pelo menos {settings.PASSWORD_MIN_LENGTH} caracteres.",
+        )
+    if email and normalize_email(email) in password.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Senha nao pode conter o e-mail.",
+        )
+    weak = {"123456", "12345678", "password", "admin123", "change-me", "senha123", "qwerty"}
+    if password.lower() in weak:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Senha muito fraca. Escolha outra senha.",
+        )
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -58,6 +81,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     user = db.query(User).filter(User.id == token_data.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuario nao encontrado")
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuario inativo")
     return user
 
 

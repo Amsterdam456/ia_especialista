@@ -67,9 +67,9 @@ export function Sidebar({
                   <button
                     className="glass-button compact"
                     onClick={() => setOpenMenuId(openMenuId === chat.id ? null : chat.id)}
-                    title="Opções"
+                    title="Opcoes"
                   >
-                    ⋯
+                    ...
                   </button>
                   {openMenuId === chat.id && (
                     <div className="chat-menu">
@@ -85,7 +85,7 @@ export function Sidebar({
         </div>
       ) : null}
 
-      {/* Métricas removidas para um visual mais clean */}
+      {showMetrics ? null : null}
 
       <GlassButton className="w-full" variant="ghost" onClick={onLogout}>
         Sair

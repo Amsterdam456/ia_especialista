@@ -9,9 +9,11 @@ class Settings(BaseSettings):
 
     EMBEDDINGS_FILE: str = "data/embeddings.pkl"
     POLICY_DIR: str = "storage/policies"
+    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     LMSTUDIO_API_URL: str = "http://127.0.0.1:1234/v1/responses"
     LMSTUDIO_MODEL: str = "qwen2.5-7b-instruct-1m"
+    LMSTUDIO_TIMEOUT_SECONDS: int = 900
 
     CHECK_INTERVAL_SECONDS: int = 86400  # 24h para watcher
     FINANCE_CSV_PATH: str = "data/finance.csv"
@@ -24,7 +26,17 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./data/athena.db"
 
     ADMIN_EMAIL: str = "admin@athena.com"
-    ADMIN_PASSWORD: str = "123"
+    ADMIN_PASSWORD: str = "change-me"
+
+    PASSWORD_MIN_LENGTH: int = 8
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_MAX_REQUESTS: int = 30
+    MAX_UPLOAD_MB: int = 20
+    MAX_QUESTION_CHARS: int = 2000
+    FEEDBACK_DIRECTIVES_LIMIT: int = 20
+
+    LOGIN_MAX_ATTEMPTS: int = 5
+    LOGIN_LOCKOUT_MINUTES: int = 15
 
     class Config:
         env_file = ".env"

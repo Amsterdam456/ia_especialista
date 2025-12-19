@@ -25,9 +25,8 @@ export function AdminPanel({ currentUser, users, policies }: Props) {
       <div className="card-title">Painel administrativo</div>
 
       <div className="grid grid-2">
-        {/* ======================= USUÁRIOS ======================= */}
         <div>
-          <p className="overline">Usuários</p>
+          <p className="overline">Usuarios</p>
           <ul className="list">
             {users.map((u) => (
               <li key={u.id}>
@@ -35,13 +34,12 @@ export function AdminPanel({ currentUser, users, policies }: Props) {
                 <span className="pill">{u.is_admin ? "Admin" : "User"}</span>
               </li>
             ))}
-            {users.length === 0 && <li className="muted">Nenhum usuário</li>}
+            {users.length === 0 && <li className="muted">Nenhum usuario</li>}
           </ul>
         </div>
 
-        {/* ======================= POLÍTICAS ======================= */}
         <div>
-          <p className="overline">Políticas</p>
+          <p className="overline">Politicas</p>
           <ul className="list">
             {policies.map((p) => (
               <li key={p.id}>
@@ -50,11 +48,11 @@ export function AdminPanel({ currentUser, users, policies }: Props) {
                   className="pill"
                   style={{
                     background:
-                      p.embedding_status === "done"
+                      p.embedding_status === "completed"
                         ? "rgba(34, 211, 238, 0.15)"
                         : "rgba(255, 193, 7, 0.15)",
                     color:
-                      p.embedding_status === "done"
+                      p.embedding_status === "completed"
                         ? "#22d3ee"
                         : "#facc15",
                   }}

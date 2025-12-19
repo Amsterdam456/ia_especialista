@@ -156,8 +156,6 @@ export default function App() {
     <AuthContext.Provider value={{ user, token, setAuth, logout }}>
       <BrowserRouter>
         <Routes>
-
-          {/* LOGIN */}
           <Route
             path="/login"
             element={
@@ -169,7 +167,6 @@ export default function App() {
             }
           />
 
-          {/* PÁGINAS */}
           <Route
             path="/home"
             element={
@@ -269,7 +266,6 @@ export default function App() {
             }
           />
 
-          {/* DEFAULT */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to={token ? "/home" : "/login"} replace />} />
         </Routes>

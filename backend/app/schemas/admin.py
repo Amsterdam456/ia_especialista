@@ -21,9 +21,11 @@ class UserAdminCreate(BaseModel):
 
 
 class UserAdminUpdate(BaseModel):
+    email: Optional[EmailStr] = None
     full_name: Optional[str] = None
     role: Optional[str] = None
     is_active: Optional[bool] = None
+    password: Optional[str] = None
 
 
 class UserAdminOut(UserAdminBase):
@@ -72,7 +74,7 @@ class ActionAuditOut(BaseModel):
     id: int
     user_id: int
     action: str
-    metadata: dict | None
+    meta: dict | None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -85,5 +87,19 @@ class ChatFeedbackOut(BaseModel):
     rating: int
     comment: str | None
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FeedbackDirectiveOut(BaseModel):
+    id: int
+    feedback_id: int
+    created_by: int
+    approved_by: int | None
+    status: str
+    text: str
+    created_at: datetime
+    approved_at: datetime | None
+    applied_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)

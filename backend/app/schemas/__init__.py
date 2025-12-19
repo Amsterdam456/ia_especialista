@@ -2,7 +2,7 @@ from app.schemas.auth import AuthResponse, Token
 from app.schemas.athena import AskRequest, AskResponse
 from app.schemas.chat import ChatCreate, ChatOut, ChatUpdate
 from app.schemas.common import Envelope, StatusResponse
-from app.schemas.message import MessageCreate, MessageOut
+from app.schemas.message import MessageCreate, MessageOut, MessageFeedbackIn
 from app.schemas.user import PasswordChange, UserBase, UserCreate, UserLogin, UserOut
 
 __all__ = [
@@ -17,6 +17,7 @@ __all__ = [
     "StatusResponse",
     "MessageCreate",
     "MessageOut",
+    "MessageFeedbackIn",
     "UserBase",
     "UserCreate",
     "UserLogin",

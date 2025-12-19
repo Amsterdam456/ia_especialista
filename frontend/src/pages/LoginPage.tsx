@@ -12,8 +12,8 @@ type Props = {
 
 export default function LoginPage({ onLoginSuccess }: Props) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@athena.com");
-  const [password, setPassword] = useState("123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +37,7 @@ export default function LoginPage({ onLoginSuccess }: Props) {
   return (
     <div className="login-shell" style={{ backgroundImage: `url(${bg})` }}>
       <div className="login-card glass-surface">
-        <p className="overline">ATHENA • Acesso seguro</p>
+        <p className="overline">ATHENA - Acesso seguro</p>
         <h1>Entrar no painel</h1>
         <p className="subtitle">
           Use suas credenciais institucionais para acessar os chats e dashboards.
@@ -45,12 +45,26 @@ export default function LoginPage({ onLoginSuccess }: Props) {
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label>E-mail</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="seu.email@empresa.com"
+            autoComplete="username"
+            required
+          />
 
           <label>Senha</label>
-          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Sua senha"
+            autoComplete="current-password"
+            required
+          />
 
-          <GlassButton type="submit" disabled={loading}>
+          <GlassButton type="submit" disabled={loading || !email || !password}>
             {loading ? "Entrando..." : "Entrar"}
           </GlassButton>
         </form>

@@ -10,6 +10,7 @@ from app.services.finance_ingest import ingest_finance_csv
 
 HASH_FILE = POLICY_DIR / ".last_hash"
 CHECK_INTERVAL_SECONDS = settings.CHECK_INTERVAL_SECONDS
+_running = False
 
 
 def calculate_policies_hash() -> str | None:
@@ -57,7 +58,16 @@ def save_last_hash(value: str | None):
 
 def start_policy_watcher():
     """Run an infinite loop that reprocesses policies and ingere CSV financeiro diariamente."""
+    global _running
+    if _running:
+        return
+    _running = True
     print("[watcher] ATHENA watcher iniciado (checagem a cada ciclo configurado)")
+
+    # Registrar hash inicial para evitar reprocessar imediatamente após o bootstrap
+    initial_hash = calculate_policies_hash()
+    if initial_hash:
+        save_last_hash(initial_hash)
 
     last_finance_run = 0.0
 
